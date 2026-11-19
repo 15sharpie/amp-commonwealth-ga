@@ -59,17 +59,19 @@ for. Add to `control-server.json` (the master's operator gives you the id and ke
 
 ```json
 "role": "node",
-"node": { "id": "<node name>", "key": "<64 hex chars>", "master_addr": "<master ip>:9020", "update_mode": "stage" },
+"node": { "id": "<node name>", "key": "<64 hex chars>", "master_addr": "<master ip>:9020", "update_mode": "apply" },
 "apply_content": true,
 "db_path": "node.db",
 "content_dir": "content"
 ```
 
-- Use `"update_mode": "stage"` with this template. With `apply`, the node swaps in whatever
-  hook DLL the master offers, under its own installed name. A master serving the `version.dll`
-  build would then overwrite our `dinput8.dll` with a DLL that lacks `DirectInput8Create`, so no
-  instance could start. `stage` downloads and verifies offers to `<file>.new` but never swaps them.
-  Update the node with AMP's Update instead (it pulls the latest GitHub release).
+- Use `"update_mode": "apply"`. The master places players only on nodes whose hook DLL matches
+  its own. With `stage`, the node kept its own DLL and the master stopped sending it instances
+  (players were kicked back to the login page). `apply` swaps the master's DLL in live, even when
+  it's the `version.dll` build saved under our `dinput8.dll` name; that worked on Wine 10 here.
+  It also self-updates the control server and then exits; AMP restarts it.
+- A node restart ends every map it's hosting, including other players' on a shared master, so
+  check the console for running instances before restarting.
 - The master learns the node's public IP from the node's own connection, so no DNS setup is needed.
 - Players still connect straight to the node over UDP 9002-9020, so keep those forwarded. TCP
   9000/9001 aren't used by a node.
