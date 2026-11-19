@@ -1,0 +1,10 @@
+[
+    {
+        "UpdateStageName": "Make Control Server Executable",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/chmod",
+        "UpdateSourceArgs": "+x \"{{$FullBaseDir}}control-server\"",
+        "SkipOnFailure": true
+    }
+]

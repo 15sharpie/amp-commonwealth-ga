@@ -52,6 +52,32 @@ If you change ports in `control-server.json`, change them in AMP's port settings
 - `nat_networks` / `nat_ip`: your LAN subnets and the server's LAN IP, so LAN players get the LAN
   address. See `hosting-behind-nat.md` in the server repo.
 
+## Running as a node of a Commonwealth master (0.1.60+)
+
+A node doesn't handle logins or chat; the master does. It runs game instances the master asks
+for. Add to `control-server.json` (the master's operator gives you the id and key):
+
+```json
+"role": "node",
+"node": { "id": "<node name>", "key": "<64 hex chars>", "master_addr": "<master ip>:9020", "update_mode": "stage" },
+"apply_content": true,
+"db_path": "node.db",
+"content_dir": "content"
+```
+
+- Use `"update_mode": "stage"` with this template. With `apply`, the node swaps in whatever
+  hook DLL the master offers, under its own installed name. A master serving the `version.dll`
+  build would then overwrite our `dinput8.dll` with a DLL that lacks `DirectInput8Create`, so no
+  instance could start. `stage` downloads and verifies offers to `<file>.new` but never swaps them.
+  Update the node with AMP's Update instead (it pulls the latest GitHub release).
+- The master learns the node's public IP from the node's own connection, so no DNS setup is needed.
+- Players still connect straight to the node over UDP 9002-9020, so keep those forwarded. TCP
+  9000/9001 aren't used by a node.
+- AMP marks a node Ready on its `Node agent '…' up` line. AMP won't list players on a node,
+  because the join/leave patterns match chat lines and chat runs on the master.
+- The node logs a warning that `dll_overrides` doesn't cover `dinput8.dll`. That's expected:
+  `amp-wine-setup.sh` adds the `dinput8` override in the Wine prefix instead.
+
 ## Deploying
 
 1. Add `15sharpie/amp-commonwealth-ga:main` to *Configuration Repositories* in the AMP

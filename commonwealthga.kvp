@@ -18,7 +18,7 @@ Meta.ContainerPolicyReason=The control server launches the Windows game server w
 Meta.ExtraContainerPackages=[]
 Meta.Prerequisites=[]
 Meta.ConfigReleaseState=NotSpecified
-Meta.ConfigVersion=6
+Meta.ConfigVersion=7
 Meta.AppConfigId=5f0d8a63-3c1e-4b52-9d1a-7e2c4a9b6f10
 Meta.NoCommercialUsage=True
 App.DisplayName=Global Agenda (Commonwealth)
@@ -56,6 +56,7 @@ App.AdminLoginTransform=None
 App.RCONConnectDelaySeconds=5
 App.RCONConnectRetrySeconds=5
 App.UpdateSources=@IncludeJson[commonwealthgaupdates.json]
+App.PreStartStages=@IncludeJson[commonwealthgastart.json]
 App.Compatibility=None
 App.SteamUpdateAnonymousLogin=False
 App.SteamForceLoginPrompt=False
@@ -67,7 +68,7 @@ App.MonitorChildProcessName=
 Console.FilterMatchRegex=
 Console.FilterMatchReplacement=
 Console.ThrowawayMessageRegex=^$
-Console.AppReadyRegex=^\[.+?\] \[main\] Binding TCP listener on port \d+$
+Console.AppReadyRegex=^\[.+?\] \[(?:main\] Binding TCP listener on port \d+|node\] Node agent '.+' up: .*)$
 Console.UserJoinRegex=^\[[^\]]+\] \[chat\] \[Chat\] (?:\w+ )?bound player='(?<username>[^']+)' guid=(?<userid>[0-9a-fA-F]+)\s*$
 Console.UserLeaveRegex=^\[[^\]]+\] \[chat\] \[Chat\] tearing down player='(?<username>[^']+)' guid=(?<userid>[0-9a-fA-F]+).*$
 Console.UserChatRegex=^$
