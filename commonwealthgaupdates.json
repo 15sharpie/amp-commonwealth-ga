@@ -45,6 +45,23 @@
         "SkipOnFailure": false
     },
     {
+        "UpdateStageName": "Write Wine Prerequisites Script",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "CreateFile",
+        "UpdateSourceArgs": "{{$FullBaseDir}}amp-wine-prereqs.sh",
+        "UpdateSourceData": "#!/bin/bash\n# Installs the game's Windows prerequisites into the Wine prefix once, with the\n# same silent switches Steam uses (see 17020/installscript.vdf). The .NET 3.5 and\n# DirectX web installers are skipped: the headless server doesn't need them.\ncd \"$(dirname \"$0\")\" || exit 1\nBASE=\"$(pwd)\"\nexport WINEPREFIX=\"$BASE/.wine\" WINEDEBUG=-all\nPRE=\"$BASE/17020/PreReqs\"\nLOG=\"$BASE/amp-wine-prereqs.log\"\nrun() {\n    echo \"== $(date -u '+%F %T') $*\" >> \"$LOG\"\n    timeout 900 /usr/bin/xvfb-run -a /usr/bin/wine \"$@\" >> \"$LOG\" 2>&1\n    local rc=$?\n    /usr/bin/wineserver -w\n    echo \"exit code $rc\" >> \"$LOG\"\n    return $rc\n}\nif [ ! -f \"$WINEPREFIX/.ga-vcredist2005\" ]; then\n    run \"$PRE/vcredist.exe\" /Q && touch \"$WINEPREFIX/.ga-vcredist2005\"\nfi\nif [ ! -f \"$WINEPREFIX/.ga-physx\" ]; then\n    run \"$PRE/physx.exe\" /passive /norestart\n    if ls \"$WINEPREFIX\"/drive_c/windows/syswow64/PhysXLoader.dll \"$WINEPREFIX\"/drive_c/windows/system32/PhysXLoader.dll 2>/dev/null | grep -q .; then\n        touch \"$WINEPREFIX/.ga-physx\"\n        echo \"PhysXLoader.dll installed\" >> \"$LOG\"\n    else\n        echo \"PhysXLoader.dll NOT found after the PhysX install\" >> \"$LOG\"\n    fi\nfi\nexit 0\n",
+        "OverwriteExistingFiles": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Install Wine Prerequisites (VC++ 2005, PhysX)",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-wine-prereqs.sh\"",
+        "SkipOnFailure": true
+    },
+    {
         "UpdateStageName": "Write Starter Config Script",
         "UpdateSourcePlatform": "Linux",
         "UpdateSource": "CreateFile",
