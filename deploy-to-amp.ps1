@@ -71,6 +71,9 @@ foreach ($k in $kvp.Keys) {
 # ADS reads the settings manifests from Plugins/ADSModule/DeploymentTemplates/<OriginalSource>/,
 # which it fills from the Configuration Repositories list ("owner/repo:branch" -> "owner-repo-branch").
 $settings['GenericModule.Meta.OriginalSource'] = $TemplateStore
+# Sign in through the controller, like instances created from AMP's UI.
+$settings['Core.Login.UseAuthServer'] = 'True'
+$settings['Core.Login.AuthServerURL'] = 'http://localhost:8080/'
 $settings['FileManagerPlugin.SFTP.SFTPIPBinding'] = '0.0.0.0'
 $settings['FileManagerPlugin.SFTP.SFTPPortNumber'] = "$SftpPort"
 
