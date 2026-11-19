@@ -1,1 +1,82 @@
-[]
+[
+    {
+        "DisplayName": "Server role",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "How this server runs. 'Keep control-server.json as is' changes nothing (edit the file yourself). 'Standalone server' runs its own login, chat and matchmaking. 'Node of a Commonwealth master' hosts maps for a master; fill in the node settings below. Applied when the server starts.",
+        "Keywords": "role,node,master,standalone",
+        "FieldName": "GARole",
+        "InputType": "enum",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GARole",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "keep",
+        "EnumValues": {
+            "keep": "Keep control-server.json as is",
+            "master": "Standalone server",
+            "node": "Node of a Commonwealth master"
+        }
+    },
+    {
+        "DisplayName": "Node ID",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "Your node's name, given to you by the master's operator (for example na-west-yourname). Only used when the role is Node.",
+        "Keywords": "node,id,name",
+        "FieldName": "GANodeId",
+        "InputType": "text",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeId",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "Placeholder": "na-west-yourname",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Node key",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "The 64-character hex key the master's operator gave you for this node. Keep it private. Only used when the role is Node.",
+        "Keywords": "node,key,secret",
+        "FieldName": "GANodeKey",
+        "InputType": "password",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeKey",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Master address",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "The master's node listener as host:port, from the master's operator. Only used when the role is Node.",
+        "Keywords": "node,master,address",
+        "FieldName": "GANodeMaster",
+        "InputType": "text",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeMaster",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "Placeholder": "203.0.113.10:9020",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Node update mode",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "How the node treats builds the master offers. Apply is needed for the master to place players on this node: it swaps in the master's hook DLL live, and for a new control server it swaps it in and exits so AMP restarts it. Stage downloads and verifies offers but never swaps them. Off ignores them.",
+        "Keywords": "node,update",
+        "FieldName": "GANodeUpdateMode",
+        "InputType": "enum",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeUpdateMode",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "apply",
+        "EnumValues": {
+            "apply": "Apply (recommended)",
+            "stage": "Stage only",
+            "off": "Off"
+        }
+    }
+]

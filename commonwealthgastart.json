@@ -6,5 +6,13 @@
         "UpdateSourceData": "/bin/chmod",
         "UpdateSourceArgs": "+x \"{{$FullBaseDir}}control-server\"",
         "SkipOnFailure": true
+    },
+    {
+        "UpdateStageName": "Apply Node Settings",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-node-config.sh\" \"{{GARole}}\" \"{{GANodeId}}\" \"{{GANodeKey}}\" \"{{GANodeMaster}}\" \"{{GANodeUpdateMode}}\"",
+        "SkipOnFailure": true
     }
 ]
