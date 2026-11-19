@@ -38,18 +38,18 @@ If you change ports in `control-server.json`, change them in AMP's port settings
 
 ## Deploying
 
-AMP can only fetch templates from public GitHub repos. While this repo is private, deploy through
-the API instead:
+1. Add `15sharpie/amp-commonwealth-ga:main` to *Configuration Repositories* in the AMP
+   controller's settings and refresh the app list.
+2. Create the instance from AMP's UI like any other app, or through the API:
 
-```powershell
-.\deploy-to-amp.ps1 -DryRun
-.\deploy-to-amp.ps1
-```
+   ```powershell
+   .\deploy-to-amp.ps1 -DryRun
+   .\deploy-to-amp.ps1
+   ```
 
-This needs `..\amp-query.ps1` and a session saved by `..\amp-login.ps1`.
-
-If the repo is made public, add `15sharpie/amp-commonwealth-ga:main` to
-*Configuration Repositories* in the AMP controller's settings and deploy it like any other app.
+   The script needs `..\amp-query.ps1` and a session saved by `..\amp-login.ps1`. AMP must
+   already have this repo in its template store (step 1), because it reads the settings files
+   from there.
 
 ## Status
 

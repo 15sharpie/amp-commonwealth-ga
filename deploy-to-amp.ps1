@@ -1,10 +1,11 @@
 <#
-  Creates an AMP instance from this template through the AMP API, without AMP having to
-  fetch the template from a (public) GitHub repo.
+  Creates an AMP instance from this template through the AMP API.
 
   It reads commonwealthga.kvp, inlines the @IncludeJson[...] files, and passes everything to
-  ADSModule/CreateInstance as provisioning settings. Uses ..\amp-query.ps1 and the session saved
-  by ..\amp-login.ps1.
+  ADSModule/CreateInstance as provisioning settings, so the instance always gets the local copy of
+  the template. AMP must already have this repo in its Configuration Repositories, because it reads
+  the settings manifests from its template store. Uses ..\amp-query.ps1 and the session saved by
+  ..\amp-login.ps1.
 
   Examples:
     .\deploy-to-amp.ps1 -DryRun                      # show what would be sent
@@ -16,6 +17,7 @@ param(
     [int]$ManagementPort = 8089,
     [int]$SftpPort = 2232,
     [int]$DatastoreId = 1,
+    [string]$TemplateStore = '15sharpie-amp-commonwealth-ga-main',
     [string]$AmpQuery = (Join-Path $PSScriptRoot '..\amp-query.ps1'),
     [switch]$DryRun
 )
@@ -66,7 +68,9 @@ foreach ($k in $kvp.Keys) {
     }
     $settings["GenericModule.$k"] = $v
 }
-$settings['GenericModule.Meta.OriginalSource'] = '15sharpie-amp-commonwealth-ga (private, deployed via API)'
+# ADS reads the settings manifests from Plugins/ADSModule/DeploymentTemplates/<OriginalSource>/,
+# which it fills from the Configuration Repositories list ("owner/repo:branch" -> "owner-repo-branch").
+$settings['GenericModule.Meta.OriginalSource'] = $TemplateStore
 $settings['FileManagerPlugin.SFTP.SFTPIPBinding'] = '0.0.0.0'
 $settings['FileManagerPlugin.SFTP.SFTPPortNumber'] = "$SftpPort"
 
@@ -85,8 +89,6 @@ $params = @{
     FriendlyName       = $FriendlyName
     IPBinding          = '0.0.0.0'
     PortNumber         = $ManagementPort
-    AdminUsername      = ''
-    AdminPassword      = ''
     ProvisionSettings  = $settings
     AutoConfigure      = $false
     PostCreate         = 0      # do nothing: the first update needs a Steam login typed in AMP
