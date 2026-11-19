@@ -47,9 +47,9 @@ If you change ports in `control-server.json`, change them in AMP's port settings
    .\deploy-to-amp.ps1
    ```
 
-   The script needs `..\amp-query.ps1` and a session saved by `..\amp-login.ps1`. AMP must
-   already have this repo in its template store (step 1), because it reads the settings files
-   from there.
+   The script needs `..\amp-query.ps1` and a session saved by `..\amp-login.ps1`. It uses the
+   same create call as the panel's wizard, so the app must already be in AMP's app list (step 1).
+   AMP only indexes the repo because of `manifest.json` at its root, so keep that file.
 
 ## Status
 
