@@ -1,0 +1,18 @@
+// Settings to ADD to the top of control-server.json to run as a node of a Commonwealth master.
+// Keep everything the starter config already has (wine paths, ports, tokens, ...).
+// control-server's parser accepts // comments, so you can paste this as is.
+{
+    "role": "node",
+    "node": {
+        "id": "na-west-yourname",                 // your node's name, from the master's operator
+        "key": "0000000000000000000000000000000000000000000000000000000000000000",  // 64 hex chars from the operator; keep private
+        "master_addr": "203.0.113.10:9020",       // the master's node listener, from the operator
+        "update_mode": "apply"                    // apply: take the master's builds (needed to be placed)
+    },
+    "apply_content": true,                        // keep the node's content tables in sync with the master
+    "db_path": "node.db",                         // the node's own database, built from dbbase/base.db
+    "content_dir": "content",                     // where content snapshots from the master are stored
+
+    // Optional while testing: per-map logs in logs/<instance>/debug.txt
+    "enabled_channels": []
+}

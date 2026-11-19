@@ -8,6 +8,17 @@ the real `GlobalAgenda.exe` under Wine + Xvfb with the project's server hook loa
 per running map. So the instance needs the **Global Agenda game files**, downloaded from Steam with
 an account that owns the game (app 17020).
 
+It can run as a standalone server (the default) or as a **node** of a Commonwealth master; see
+[docs/NODE-SETUP.md](docs/NODE-SETUP.md). Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+## Requirements
+
+- **CPU with AVX2 (x86-64-v3).** The released `control-server` won't start without it
+  (`CPU ISA level is lower than required`). On a VM, use CPU type `x86-64-v3` or `host`.
+- AMP 2.5+ with Docker. The template runs in `cubecoders/ampbase:wine-10-stable`.
+- A Steam account that owns Global Agenda (app 17020); about 12 GB of disk for the game.
+- About 0.5 GB of RAM per running map.
+
 ## What an update does
 
 1. Downloads Global Agenda (app 17020, Windows depot) with SteamCMD. **Needs a Steam login.** AMP
@@ -55,15 +66,8 @@ If you change ports in `control-server.json`, change them in AMP's port settings
 ## Running as a node of a Commonwealth master (0.1.60+)
 
 A node doesn't handle logins or chat; the master does. It runs game instances the master asks
-for. Add to `control-server.json` (the master's operator gives you the id and key):
-
-```json
-"role": "node",
-"node": { "id": "<node name>", "key": "<64 hex chars>", "master_addr": "<master ip>:9020", "update_mode": "apply" },
-"apply_content": true,
-"db_path": "node.db",
-"content_dir": "content"
-```
+for. Full walkthrough: [docs/NODE-SETUP.md](docs/NODE-SETUP.md). Settings to add:
+[examples/node-settings.example.jsonc](examples/node-settings.example.jsonc).
 
 - Use `"update_mode": "apply"`. The master places players only on nodes whose hook DLL matches
   its own. With `stage`, the node kept its own DLL and the master stopped sending it instances
@@ -97,5 +101,8 @@ for. Add to `control-server.json` (the master's operator gives you the id and ke
 
 ## Status
 
-The server project is early and experimental, with no official setup docs. Upstream runs it under
-Proton-GE Wine. This template uses WineHQ stable from the AMP image, so expect some tuning.
+Working as of 2026-11-19 with release 0.1.60, both standalone (login, character creation, home map,
+travel) and as a node of the public master (placed by the master, clients connect). The server
+project is early and changes daily, and upstream runs it under Proton-GE Wine rather than WineHQ,
+so new releases may need tuning. What's still missing for fully self-service nodes:
+[TODO.md](TODO.md).
