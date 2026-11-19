@@ -37,28 +37,20 @@
         "SkipOnFailure": false
     },
     {
-        "UpdateStageName": "Initialise Wine Prefix",
-        "UpdateSourcePlatform": "Linux",
-        "UpdateSource": "Executable",
-        "UpdateSourceData": "/bin/bash",
-        "UpdateSourceArgs": "-c \"if [ ! -f \\\"{{$FullRootDir}}.wine/system.reg\\\" ]; then WINEPREFIX=\\\"{{$FullRootDir}}.wine\\\" WINEDEBUG=-all /usr/bin/xvfb-run -a /usr/bin/wineboot --init; fi\"",
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "Write Wine Prerequisites Script",
+        "UpdateStageName": "Write Wine Setup Script",
         "UpdateSourcePlatform": "Linux",
         "UpdateSource": "CreateFile",
-        "UpdateSourceArgs": "{{$FullBaseDir}}amp-wine-prereqs.sh",
-        "UpdateSourceData": "#!/bin/bash\n# Installs the game's Windows prerequisites from 17020/PreReqs into the Wine\n# prefix, once each, with the same switches Steam uses (17020/installscript.vdf):\n# VC++ 2005, NVIDIA PhysX, .NET Framework 3.5 and DirectX (web setup).\n# Each one leaves a marker in the prefix, so later updates skip it.\n# Results go to amp-wine-prereqs.log next to this script.\ncd \"$(dirname \"$0\")\" || exit 1\nBASE=\"$(pwd)\"\nexport WINEPREFIX=\"$BASE/.wine\" WINEDEBUG=-all\nPRE=\"$BASE/17020/PreReqs\"\nLOG=\"$BASE/amp-wine-prereqs.log\"\n\ninstall() {   # install <marker> <installer> <switches...>\n    local marker=\"$WINEPREFIX/.ga-prereq-$1\"; shift\n    if [ -f \"$marker\" ]; then echo \"== skip $1 (already installed)\" >> \"$LOG\"; return 0; fi\n    if [ ! -f \"$PRE/$1\" ]; then echo \"== skip $1 (not in PreReqs)\" >> \"$LOG\"; return 0; fi\n    echo \"== $(date -u '+%F %T') $*\" >> \"$LOG\"\n    timeout 1800 /usr/bin/xvfb-run -a /usr/bin/wine \"$PRE/$1\" \"${@:2}\" >> \"$LOG\" 2>&1\n    local rc=$?\n    /usr/bin/wineserver -w\n    echo \"exit code $rc\" >> \"$LOG\"\n    # 0 = success, 3010 % 256 = 194 = success but wants a reboot.\n    if [ $rc -eq 0 ] || [ $rc -eq 194 ]; then touch \"$marker\"; fi\n}\n\ninstall vcredist   vcredist.exe   /Q\ninstall physx      physx.exe      /passive /norestart\ninstall dotnet35   dotnetfx35.exe /qb\ninstall directx    dxwebsetup.exe /Q\n\nif ls \"$WINEPREFIX\"/drive_c/windows/syswow64/PhysXLoader.dll \"$WINEPREFIX\"/drive_c/windows/system32/PhysXLoader.dll 2>/dev/null | grep -q .; then\n    echo \"check: PhysXLoader.dll present\" >> \"$LOG\"\nelse\n    echo \"check: PhysXLoader.dll MISSING\" >> \"$LOG\"\nfi\nexit 0\n",
+        "UpdateSourceArgs": "{{$FullBaseDir}}amp-wine-setup.sh",
+        "UpdateSourceData": "#!/bin/bash\n# Sets up the Wine prefix and installs the game's Windows prerequisites.\n#\n# - Creates the prefix with the Wine Mono/Gecko install prompts turned off. Under Xvfb\n#   those prompts wait forever for a click, so wineboot never finishes the 32-bit\n#   (syswow64) half and every 32-bit program, GlobalAgenda.exe included, fails with\n#   \"could not load kernel32.dll, status c0000135\".\n# - Rebuilds the prefix if syswow64 is missing or nearly empty.\n# - Runs each installer from 17020/PreReqs once, with Steam's own switches\n#   (17020/installscript.vdf). VC++ 2005 and PhysX are what the server needs. .NET 3.5\n#   and the DirectX web setup don't install under Wine; they're tried once and skipped.\n#\n# Every Wine call is time-limited so a stuck dialog can't hang an update.\n# Results go to amp-wine-setup.log next to this script.\ncd \"$(dirname \"$0\")\" || exit 1\nBASE=\"$(pwd)\"\nexport WINEPREFIX=\"$BASE/.wine\" WINEDEBUG=-all\nPRE=\"$BASE/17020/PreReqs\"\nLOG=\"$BASE/amp-wine-setup.log\"\necho \"== $(date -u '+%F %T') $(/usr/bin/wine --version)\" >> \"$LOG\"\n\nwow64_count() { ls \"$WINEPREFIX/drive_c/windows/syswow64\" 2>/dev/null | wc -l; }\n\nif [ \"$(wow64_count)\" -lt 100 ]; then\n    echo \"creating Wine prefix\" >> \"$LOG\"\n    /usr/bin/wineserver -k 2>/dev/null\n    rm -rf \"$WINEPREFIX\"\n    WINEDLLOVERRIDES=\"mscoree,mshtml=\" timeout 600 /usr/bin/xvfb-run -a \\\n        sh -c '/usr/bin/wineboot --init; /usr/bin/wineserver -w' >> \"$LOG\" 2>&1\n    echo \"syswow64 entries: $(wow64_count)\" >> \"$LOG\"\nfi\n\ninstall() {   # install required|optional <name> <installer> <switches...>\n    local kind=\"$1\" marker=\"$WINEPREFIX/.ga-prereq-$2\" exe=\"$3\"; shift 3\n    [ -f \"$marker\" ] && return 0\n    if [ ! -f \"$PRE/$exe\" ]; then echo \"skip $exe: not in PreReqs\" >> \"$LOG\"; return 0; fi\n    echo \"-- $(date -u '+%T') $exe $*\" >> \"$LOG\"\n    WINEDLLOVERRIDES=\"mscoree=n,b;mshtml=\" timeout 600 /usr/bin/xvfb-run -a \\\n        /usr/bin/wine \"$PRE/$exe\" \"$@\" >> \"$LOG\" 2>&1\n    local rc=$?\n    timeout 60 /usr/bin/wineserver -w\n    /usr/bin/wineserver -k 2>/dev/null\n    echo \"exit code $rc\" >> \"$LOG\"\n    # Success is 0, or 194 (3010 = done, reboot wanted). Optional ones are only tried once.\n    if [ $rc -eq 0 ] || [ $rc -eq 194 ] || [ \"$kind\" = optional ]; then touch \"$marker\"; fi\n}\n\ninstall required vcredist vcredist.exe   /Q\ninstall required physx    physx.exe      /passive /norestart\ninstall optional dotnet35 dotnetfx35.exe /qb\ninstall optional directx  dxwebsetup.exe /Q\n\nif ls \"$WINEPREFIX\"/drive_c/windows/syswow64/PhysXLoader.dll >/dev/null 2>&1; then\n    echo \"check: PhysXLoader.dll present\" >> \"$LOG\"\nelse\n    echo \"check: PhysXLoader.dll MISSING\" >> \"$LOG\"\nfi\nexit 0\n",
         "OverwriteExistingFiles": true,
         "SkipOnFailure": false
     },
     {
-        "UpdateStageName": "Install Game Prerequisites into Wine (PreReqs folder)",
+        "UpdateStageName": "Set Up Wine Prefix and Game Prerequisites",
         "UpdateSourcePlatform": "Linux",
         "UpdateSource": "Executable",
         "UpdateSourceData": "/bin/bash",
-        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-wine-prereqs.sh\"",
+        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-wine-setup.sh\"",
         "SkipOnFailure": true
     },
     {

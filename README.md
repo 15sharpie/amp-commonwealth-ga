@@ -14,10 +14,16 @@ an account that owns the game (app 17020).
    asks for it the first time; type it into AMP yourself.
 2. Downloads the latest `control-server` and `version.dll` from the project's GitHub releases.
    `version.dll` goes into `17020/Binaries/`.
-3. Creates the Wine prefix (`.wine`) if it is missing.
+3. Sets up the Wine prefix (`.wine`) with `amp-wine-setup.sh`, logging to `amp-wine-setup.log`:
+   - creates it with the Wine Mono/Gecko prompts off. Under Xvfb those prompts wait forever,
+     so the prefix never gets its 32-bit half (`syswow64`) and `GlobalAgenda.exe` fails with
+     `could not load kernel32.dll, status c0000135`. It rebuilds a prefix whose `syswow64` is empty.
+   - installs the game's own prerequisites from `17020/PreReqs` once each, with Steam's switches:
+     VC++ 2005 and NVIDIA PhysX (needed for `PhysXLoader.dll`). The .NET 3.5 and DirectX web
+     installers don't install under Wine; they're tried once and then skipped.
 4. Writes a starter `control-server.json` **only if none exists**. After that, updates leave it alone.
 
-Runs in the `cubecoders/ampbase:wine-stable` container.
+Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Wine 10 build).
 
 ## Ports
 
