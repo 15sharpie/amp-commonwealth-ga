@@ -4,7 +4,7 @@ An [AMP](https://cubecoders.com/AMP) generic-module template that runs the open-
 [Commonwealth Global Agenda server](https://github.com/commonwealthga/commonwealth-ga-server).
 
 The Commonwealth `control-server` (a Linux binary) handles login, chat and matchmaking. It launches
-the real `GlobalAgenda.exe` under Wine + Xvfb with the project's `version.dll` hook loaded, once
+the real `GlobalAgenda.exe` under Wine + Xvfb with the project's server hook loaded, once
 per running map. So the instance needs the **Global Agenda game files**, downloaded from Steam with
 an account that owns the game (app 17020).
 
@@ -12,16 +12,26 @@ an account that owns the game (app 17020).
 
 1. Downloads Global Agenda (app 17020, Windows depot) with SteamCMD. **Needs a Steam login.** AMP
    asks for it the first time; type it into AMP yourself.
-2. Downloads the latest `control-server` and `version.dll` from the project's GitHub releases.
-   `version.dll` goes into `17020/Binaries/`.
-3. Sets up the Wine prefix (`.wine`) with `amp-wine-setup.sh`, logging to `amp-wine-setup.log`:
+2. Downloads the latest `control-server` and server hook `dinput8.dll` from the project's GitHub
+   releases. The hook goes into `17020/Binaries/`, and any old `version.dll` there is removed.
+   - Use `dinput8.dll`, not `version.dll`: `GlobalAgenda.exe` imports DINPUT8 at startup, but under
+     WineHQ Wine nothing loads `version.dll`, so that hook never runs and the game crashes about 3
+     seconds in (Wine's debugger then holds it, so the map sits at STARTING forever).
+   - Both release DLLs are the server hook. The player client hook isn't released.
+3. Downloads `dbbase/base.db` from the server repo. The control server builds a brand-new
+   `server.db` from it (all game content, no players). It's ignored once `server.db` exists, so a
+   database created before 0.1.59 keeps missing content tables (`map_game_info` and others); move
+   that `server.db` aside to rebuild.
+4. Sets up the Wine prefix (`.wine`) with `amp-wine-setup.sh`, logging to `amp-wine-setup.log`:
    - creates it with the Wine Mono/Gecko prompts off. Under Xvfb those prompts wait forever,
      so the prefix never gets its 32-bit half (`syswow64`) and `GlobalAgenda.exe` fails with
      `could not load kernel32.dll, status c0000135`. It rebuilds a prefix whose `syswow64` is empty.
    - installs the game's own prerequisites from `17020/PreReqs` once each, with Steam's switches:
      VC++ 2005 and NVIDIA PhysX (needed for `PhysXLoader.dll`). The .NET 3.5 and DirectX web
      installers don't install under Wine; they're tried once and then skipped.
-4. Writes a starter `control-server.json` **only if none exists**. After that, updates leave it alone.
+   - adds a Wine DLL override so the game's own `dinput8.dll` loads instead of Wine's built-in one
+     (`control-server` only sets `version=n,b` itself).
+5. Writes a starter `control-server.json` **only if none exists**. After that, updates leave it alone.
 
 Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Wine 10 build).
 
