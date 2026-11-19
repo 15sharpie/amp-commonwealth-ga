@@ -1,0 +1,26 @@
+[
+    {
+        "Protocol": "TCP",
+        "Port": 9000,
+        "Ref": "ApplicationPort1",
+        "Name": "Login Port",
+        "Description": "TCP port game clients log in through. Must match tcp_port in control-server.json."
+    },
+    {
+        "Protocol": "TCP",
+        "Port": 9001,
+        "Ref": "ApplicationPort2",
+        "Name": "Chat Port",
+        "Description": "TCP chat port. Must match chat_port in control-server.json."
+    },
+    {
+        "Protocol": "UDP",
+        "Port": 9002,
+        "Range": 19,
+        "MinListening": 0,
+        "IsDelayedOpen": true,
+        "Ref": "MatchPorts",
+        "Name": "Match Ports",
+        "Description": "UDP ports 9002-9020, one per running game instance (home map and matches). Must match udp_port_range in control-server.json."
+    }
+]

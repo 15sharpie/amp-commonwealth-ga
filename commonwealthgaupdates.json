@@ -1,0 +1,64 @@
+[
+    {
+        "UpdateStageName": "Global Agenda Game Download",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "SteamCMD",
+        "UpdateSourceData": "17020",
+        "UpdateSourceArgs": "17020",
+        "ForceDownloadPlatform": "Windows",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Control Server Download",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "GithubRelease",
+        "UpdateSourceArgs": "commonwealthga/commonwealth-ga-server",
+        "UpdateSourceData": "control-server",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "OverwriteExistingFiles": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Server Hook DLL Download",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "GithubRelease",
+        "UpdateSourceArgs": "commonwealthga/commonwealth-ga-server",
+        "UpdateSourceData": "version.dll",
+        "UpdateSourceTarget": "{{$FullBaseDir}}17020/Binaries/",
+        "OverwriteExistingFiles": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Make Control Server Executable",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/chmod",
+        "UpdateSourceArgs": "+x \"{{$FullBaseDir}}control-server\"",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Initialise Wine Prefix",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "-c \"if [ ! -f \\\"{{$FullRootDir}}.wine/system.reg\\\" ]; then WINEPREFIX=\\\"{{$FullRootDir}}.wine\\\" WINEDEBUG=-all /usr/bin/xvfb-run -a /usr/bin/wineboot --init; fi\"",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Write Starter Config Script",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "CreateFile",
+        "UpdateSourceArgs": "{{$FullBaseDir}}amp-make-config.sh",
+        "UpdateSourceData": "#!/bin/bash\n# Writes a starter control-server.json on first install only.\n# Updates never overwrite an existing control-server.json, so edit it freely.\ncd \"$(dirname \"$0\")\" || exit 1\nmkdir -p logs crashes\n[ -f control-server.json ] && exit 0\nBASE=\"$(pwd)\"\ntok() { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \\n'; }\ncat > control-server.json <<EOF\n{\n    \"wine_binary\": \"/usr/bin/wine\",\n    \"wine_prefix\": \"${BASE}/.wine\",\n    \"xvfb_run_path\": \"/usr/bin/xvfb-run\",\n    \"game_binary\": \"${BASE}/17020/Binaries/GlobalAgenda.exe\",\n    \"host\": \"127.0.0.1\",\n    \"nat_networks\": \"\",\n    \"nat_ip\": \"\",\n    \"home_map_name\": \"Dome3_VR_Arena_P\",\n    \"home_map_game_mode\": \"TgGame.TgGame_Mission\",\n    \"tcp_port\": 9000,\n    \"chat_port\": 9001,\n    \"ipc_port\": 9010,\n    \"udp_port_range\": { \"lo\": 9002, \"hi\": 9020 },\n    \"admin_token\": \"$(tok)\",\n    \"overlay_http_port\": 0,\n    \"overlay_token\": \"$(tok)\",\n    \"startup_timeout_seconds\": 300,\n    \"db_path\": \"${BASE}/server.db\",\n    \"crash_dir\": \"Z:${BASE}/crashes\",\n    \"log_dir\": \"Z:${BASE}/logs\",\n    \"fix_package_guids\": false,\n    \"clear_logs\": true,\n    \"use_docker\": false,\n    \"per_slot_prefix\": false,\n    \"enabled_channels\": [],\n    \"enabled_crash_channels\": [],\n    \"announcers\": []\n}\nEOF\nchmod 600 control-server.json\n",
+        "OverwriteExistingFiles": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Create Starter Config",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-make-config.sh\"",
+        "SkipOnFailure": false
+    }
+]
