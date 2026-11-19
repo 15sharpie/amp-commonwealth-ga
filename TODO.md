@@ -6,12 +6,12 @@ This is what's left to make it self-service.
 
 ## In this template
 
-- [ ] **Node settings in AMP's Configuration page.** Add a settings manifest
-  (`commonwealthgaconfig.json`) with Role (standalone/node), Node ID, Node key (password field),
-  Master address and Update mode, plus a pre-start step that writes them into `control-server.json`.
-  Then nobody has to edit JSON by hand. Today the manifest is empty (`[]`).
-- [ ] **Starter config that knows about nodes.** `amp-make-config.sh` only writes a standalone
-  config. It should write the node block when the AMP settings above say node.
+- [x] **Node settings in AMP's Configuration page.** Done (template v8): Server role, Node ID,
+  Node key (password field), Master address and Node update mode, written into
+  `control-server.json` by the `amp-node-config.sh` start-up step with `jq`. Tested on a
+  throwaway instance with each role and with a bad key.
+- [x] **Starter config that knows about nodes.** Covered by the start-up step above: it turns the
+  standalone starter config into a node config (and back) based on the settings.
 - [ ] **CPU check with a clear message.** Have `amp-wine-setup.sh` check `/proc/cpuinfo` for
   `avx2` and log "this CPU can't run the control server (needs x86-64-v3)". The only error today is
   `CPU ISA level is lower than required`, after AMP has already failed twice.

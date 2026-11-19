@@ -46,26 +46,30 @@ starter `control-server.json`. Check `amp-wine-setup.log` in the file manager: i
 
 ## 3. Turn it into a node
 
-In the AMP file manager, open `control-server.json` and add the node settings at the top. Keep
-everything the starter config already has. See
-[`../examples/node-settings.example.jsonc`](../examples/node-settings.example.jsonc):
+Open the instance's **Configuration → Global Agenda → Node** settings and set:
 
-```json
-"role": "node",
-"node": {
-    "id": "<your node id>",
-    "key": "<your 64-hex key>",
-    "master_addr": "<master ip>:9020",
-    "update_mode": "apply"
-},
-"apply_content": true,
-"db_path": "node.db",
-"content_dir": "content",
-```
+| Setting | Value |
+|---|---|
+| Server role | **Node of a Commonwealth master** |
+| Node ID | your node id from the operator |
+| Node key | your 64-hex key (a password field, so it stays hidden) |
+| Master address | `<master ip>:9020` |
+| Node update mode | **Apply (recommended)** |
 
-Use `"update_mode": "apply"`. The master only sends players to nodes whose hook DLL matches its
-own, and `apply` lets the node take the master's DLL. With `stage` or `off`, players get kicked back
-to the login page when they start a mission.
+They're written into `control-server.json` the next time the server starts, by a start-up step
+(`amp-node-config.sh`). It adds `role`, the `node` block, `apply_content`, `db_path` set to
+`node.db`, and `content_dir`, and keeps everything else in the file. It doesn't touch the file if
+a setting is missing or malformed (empty ID, a key that isn't 64 hex characters, an address that
+isn't host:port). It saves the previous file as `control-server.json.bak-amp`. Check
+`amp-node-config.log` (the key is never logged).
+
+Keep **Apply**. The master only sends players to nodes whose hook DLL matches its own, and `apply`
+lets the node take the master's DLL. With `stage` or `off`, players get kicked back to the login
+page when they start a mission.
+
+Prefer editing by hand? Leave Server role on **Keep control-server.json as is** and add the
+settings from [`../examples/node-settings.example.jsonc`](../examples/node-settings.example.jsonc)
+yourself.
 
 ## 4. Start it and check the console
 

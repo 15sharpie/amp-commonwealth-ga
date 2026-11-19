@@ -17,7 +17,9 @@ show up in the instance console, in `amp-wine-setup.log`, or as a map stuck at `
 | Players don't appear in AMP's user list | On a master, the join/leave patterns need the chat lines (template v6+). On a node they can't work yet. | Master: update the template. Node: waiting on upstream issue [#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93). |
 | AMP panel: "Unmanaged instances cannot be accessed from within ADS" | The instance was created with `ADSModule/CreateInstance` and inline settings. | Delete it and create it from the panel's wizard, or with `deploy-to-amp.ps1`, which uses `CreateInstanceFromSpec`. |
 | AMP never lists the app after adding the repo | The repo has no `manifest.json`, or it's private. | Keep `manifest.json` at the root (`"repotype": "AppTemplates"`). AMP can only read public repos. |
-| An update started through the AMP API reports success but does nothing | AMP needs the panel for the Steam login step. | Click **Update** in the panel. |
+| An update started through the AMP API reports success but does nothing | The SteamCMD step needs a login, which only the panel can provide. Updates without a Steam step run fine from the API. | Click **Update** in the panel. |
+| Start does nothing on a brand-new instance | The app has never been updated, so there's nothing to start. | Run the first **Update** from the panel. |
+| Node settings from the Configuration page don't show up in `control-server.json` | The start-up step skipped them. | Read `amp-node-config.log`: it says why (missing or malformed setting, `jq` missing, or `control-server.json` isn't plain JSON, for example after `//` comments were pasted in). |
 
 ## Getting more detail
 

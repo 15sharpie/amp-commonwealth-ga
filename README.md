@@ -66,7 +66,9 @@ If you change ports in `control-server.json`, change them in AMP's port settings
 ## Running as a node of a Commonwealth master (0.1.60+)
 
 A node doesn't handle logins or chat; the master does. It runs game instances the master asks
-for. Full walkthrough: [docs/NODE-SETUP.md](docs/NODE-SETUP.md). Settings to add:
+for. Set it up in AMP under **Configuration → Global Agenda → Node** (role, node ID, key, master
+address, update mode); a start-up step writes those into `control-server.json`. Full walkthrough:
+[docs/NODE-SETUP.md](docs/NODE-SETUP.md). To edit by hand instead:
 [examples/node-settings.example.jsonc](examples/node-settings.example.jsonc).
 
 - Use `"update_mode": "apply"`. The master places players only on nodes whose hook DLL matches
