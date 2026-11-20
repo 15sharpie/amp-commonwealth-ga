@@ -29,6 +29,10 @@ This is what's left to make it fully self-service.
 - [ ] **Leave the hook DLL alone on nodes during AMP updates.** The "Server Hook DLL Download"
   stage puts the release `dinput8.dll` back on every update, which a node immediately replaces with
   the master's on its next handshake. Harmless, but it could be skipped when role is node.
+- [ ] **Standalone app: follow AMP's ports.** The Node app writes AMP's Match Ports into
+  `control-server.json` on every start; the standalone app's starter config still hard-codes
+  9000/9001/9002-9020, so a second instance on one machine needs a hand edit. Both apps also share
+  the default IPC port 9010.
 - [ ] **Daily restart that doesn't kick players.** A scheduled restart lets a standalone server
   pick up a changed public IP and new releases. On a node it should wait until no maps are running;
   AMP's scheduler can't see that, so it needs a small script or an upstream "drain" command.
@@ -54,10 +58,12 @@ This is what's left to make it fully self-service.
 
 ## Not verified yet
 
-- [ ] **The Node app from scratch.** Create, update and start an instance of **Global Agenda
-  (Commonwealth Node)** in the panel, including what AMP shows when the node settings are missing.
-  Its downloads and start-up steps are the standalone app's, which were tested, but the app as a
-  whole hasn't been run.
+- [ ] **The Node app with the real game.** Tested 2026-11-20 on a throwaway instance with a
+  stand-in `control-server` (no game download): AMP lists the app; it gets the node settings page
+  and only Match Ports + Master Link on Status; with empty settings it fails to start and the
+  console says which settings to fill in; with settings it writes the node config, follows AMP's
+  ports and goes Ready on the node line. Still to do: a full first update and run with a real
+  node key.
 
 - [ ] **Control server self-update on a node.** With `update_mode: apply`, a new `control-server`
   from the master is swapped in and the agent exits so AMP restarts it. It should work, because
@@ -65,8 +71,8 @@ This is what's left to make it fully self-service.
 - [ ] **Players from outside the LAN on a node.** Tested from inside the node's network (through
   the router's NAT loopback) and with other master players placed on the node, but not
   deliberately from a separate internet connection.
-- [ ] **Master Link turning red during a real master outage.** On the live node it showed closed
-  before the first handshake and green right after it, but the master hasn't dropped the link since.
-  The check is the same in both cases (an established TCP connection to `master_addr`).
+- [x] **Master Link turning red when the link drops.** Tested 2026-11-20 on a throwaway instance
+  with a stand-in master: green while connected, red within 5 seconds of the connection closing,
+  and the listener closed when the server stopped. Not yet seen during a real master outage.
 - [ ] **Template update applied to an existing instance through AMP's normal flow.** Changes so far
   were pushed to the test instance through the API, because of the repo-name bug above.

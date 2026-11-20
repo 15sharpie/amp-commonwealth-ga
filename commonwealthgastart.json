@@ -14,13 +14,5 @@
         "UpdateSourceData": "/bin/bash",
         "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-node-config.sh\" \"{{GARole}}\" \"{{GANodeId}}\" \"{{GANodeKey}}\" \"{{GANodeMaster}}\" \"{{GANodeUpdateMode}}\"",
         "SkipOnFailure": true
-    },
-    {
-        "UpdateStageName": "Start Master Link Indicator",
-        "UpdateSourcePlatform": "Linux",
-        "UpdateSource": "Executable",
-        "UpdateSourceData": "/bin/bash",
-        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-master-link.sh\" 9021",
-        "SkipOnFailure": true
     }
 ]

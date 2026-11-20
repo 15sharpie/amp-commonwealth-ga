@@ -6,8 +6,9 @@ and the player's game connects straight to that node over UDP.
 
 This walkthrough takes a fresh AMP install to a working node. The node setup was tested on
 2026-11-19 with release 0.1.60, AMP 2.8 and the `cubecoders/ampbase:wine-10-stable` image, on an
-instance of the standalone app switched to node. The separate Node app (added 2026-11-20) uses the
-same downloads and start-up steps but hasn't had a full run from scratch yet.
+instance of the standalone app switched to node. The separate Node app (added 2026-11-20) was
+tested in AMP with a stand-in server (settings page, refusing to start without settings, Status
+page, Master Link); a full run with the game and a real node key is still to do.
 
 ## Before you start
 
@@ -23,9 +24,11 @@ You need:
 - **A node id and key from the master's operator.** The id is your node's name (for example
   `na-west-yourname`); the key is 64 hex characters, shared between your node and the master. Keep
   the key private.
-- **UDP ports 9002–9020 forwarded** from your router to the AMP machine. Nodes don't need TCP
-  9000/9001. The node connects *out* to the master on TCP 9020, so no inbound rule is needed for
-  that.
+- **The node's UDP match ports forwarded** from your router to the AMP machine: 9002–9020, unless
+  another instance on that machine already uses them, in which case AMP gives the node other ones.
+  The node's Status page lists the ports it actually uses (Match Ports), and the node follows them.
+  Nodes don't need TCP 9000/9001. The node connects *out* to the master on TCP 9020, so no inbound
+  rule is needed for that.
 - **Memory:** about 0.5 GB per running map, plus a little for the agent.
 
 Everything below happens in the AMP panel.
@@ -60,8 +63,8 @@ Open the instance's **Configuration → Global Agenda → Node** settings and se
 
 They're written into `control-server.json` every time the server starts, by a start-up step
 (`amp-node-config.sh`). It sets `role` to `node`, the `node` block, `apply_content`, `db_path` to
-`node.db` and `content_dir`, and keeps everything else in the file. It saves the previous file as
-`control-server.json.bak-amp`.
+`node.db`, `content_dir`, and `udp_port_range` to the Match Ports in AMP's port settings, and
+keeps everything else in the file. It saves the previous file as `control-server.json.bak-amp`.
 
 **The server won't start until these are right.** If the ID is empty, the key isn't 64 hex
 characters or the address isn't host:port, the start-up step fails, so AMP never runs the server
@@ -106,11 +109,12 @@ These two lines are expected and harmless:
 
 - **Match Ports 9002-9020:** green *Listening (n/19, need 1)* while at least one match runs, red
   *Not Listening (0/19)* when the node is idle. Idle is normal for a node.
-- **Master Link 9021:** green while the node is connected to its master, red when it isn't. AMP
-  can only colour ports, so the `Start Master Link Indicator` start-up step (`amp-master-link.sh`)
-  opens a listener on `127.0.0.1:9021` while `control-server` has an open connection to
-  `master_addr`, and closes it when that connection drops. It checks every 5 seconds and logs each
-  change to `amp-master-link.log`. Don't forward 9021; nothing outside the machine uses it.
+- **Master Link** (TCP 9021 by default): green while the node is connected to its master, red
+  when it isn't. AMP can only colour ports, so the `Start Master Link Indicator` start-up step
+  (`amp-master-link.sh`) opens a listener on `127.0.0.1` on that port while `control-server` has an
+  open connection to `master_addr`, and closes it when that connection drops. It checks every 5
+  seconds and logs each change to `amp-master-link.log`. Don't forward it; nothing outside the
+  machine uses it.
 - **Primary Endpoint** is the node's first match port. There's no Connection Link: players log in
   through the master, not the node.
 

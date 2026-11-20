@@ -64,7 +64,10 @@ Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Win
 | 9010 | TCP | local | local | Internal IPC between the control server and game processes (`ipc_port`). Don't forward it. |
 | 9021 | TCP | – | local | AMP's **Master Link** light, open on `127.0.0.1` while the node is connected to its master. Don't forward it. |
 
-If you change ports in `control-server.json`, change them in AMP's port settings too.
+These are the defaults. AMP gives an instance other ports when another instance on the machine
+already uses them; the Status page lists the ones an instance really has. The Node app follows
+AMP's ports by itself. For the standalone app, keep `control-server.json` and AMP's port settings
+the same by hand.
 
 ## Setting it up
 
