@@ -69,8 +69,8 @@ Console.FilterMatchRegex=
 Console.FilterMatchReplacement=
 Console.ThrowawayMessageRegex=^$
 Console.AppReadyRegex=^\[.+?\] \[(?:main\] Binding TCP listener on port \d+|node\] Node agent '.+' up: .*)$
-Console.UserJoinRegex=^\[[^\]]+\] \[chat\] \[Chat\] (?:\w+ )?bound player='(?<username>[^']+)' guid=(?<userid>[0-9a-fA-F]+)\s*$
-Console.UserLeaveRegex=^\[[^\]]+\] \[chat\] \[Chat\] tearing down player='(?<username>[^']+)' guid=(?<userid>[0-9a-fA-F]+).*$
+Console.UserJoinRegex=^\[[^\]]+\] (?:\[chat\] \[Chat\] (?:\w+ )?bound player='(?<username>[^']+)' guid=(?<userid>[0-9a-fA-F]+)|\[node\] player joined instance=\d+ user=(?<userid>\d+) character=\d+ name='(?<username>.+)')\s*$
+Console.UserLeaveRegex=^\[[^\]]+\] (?:\[chat\] \[Chat\] tearing down player='(?<username>[^']+)' guid=(?<userid>[0-9a-fA-F]+).*|\[node\] player left instance=\d+ user=(?<userid>\d+) character=\d+ name='(?<username>.+)' reason=\w+\s*)$
 Console.UserChatRegex=^$
 Console.UpdateAvailableRegex=^$
 Console.SuppressLogAtStart=False

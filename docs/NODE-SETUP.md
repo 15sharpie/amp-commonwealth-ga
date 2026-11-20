@@ -143,11 +143,12 @@ afterwards, because it writes a lot.
 - **A restart ends every map the node is hosting**, including other players' matches. Check the
   console for running instances first.
 - **Updates:** the master pushes new hook DLLs live. When the master offers a new
-  `control-server`, the node swaps it in and exits, and AMP restarts it. AMP's own **Update** also
-  pulls the latest GitHub release; the node takes the master's DLL again on its next handshake.
-- **Players aren't shown in AMP's user list** on a node. The node doesn't log player names or
-  leaves yet (upstream request:
-  [commonwealthga/commonwealth-ga-server#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93)).
+  `control-server`, the node waits until no map is running, swaps it in and exits, and AMP
+  restarts it a few seconds later. You don't need to do anything. AMP's own **Update** also pulls
+  the latest GitHub release; the node takes the master's builds again on its next handshake.
+- **Players show in AMP's user list** while they're in a map on the node (0.1.61+, which logs
+  `[node] player joined … name='…'` and `player left …`). Players who are only logged in to the
+  master, in no map on this node, don't show: they aren't on this machine.
 - **CPU and RAM in AMP** only cover the node agent, not the Wine processes running the maps.
 
 Something not working? See [TROUBLESHOOTING.md](TROUBLESHOOTING.md).

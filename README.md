@@ -115,8 +115,8 @@ update mode). The server won't start until those are set. Full walkthrough:
   check the console for running instances before restarting.
 - The master learns the node's public IP from the node's own connection, so no DNS setup is needed.
 - AMP's Status page shows **Match Ports** (green while a match runs) and **Master Link** (green
-  while the node is connected to its master). AMP won't list players on a node yet (upstream
-  [#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93)).
+  while the node is connected to its master). AMP's user list shows the players in maps on the
+  node (0.1.61+).
 - The node logs a warning that `dll_overrides` doesn't cover `dinput8.dll`. That's expected:
   `amp-wine-setup.sh` adds the `dinput8` override in the Wine prefix instead.
 

@@ -69,8 +69,8 @@ Console.FilterMatchRegex=
 Console.FilterMatchReplacement=
 Console.ThrowawayMessageRegex=^$
 Console.AppReadyRegex=^\[.+?\] \[node\] Node agent '.+' up: .*$
-Console.UserJoinRegex=^$
-Console.UserLeaveRegex=^$
+Console.UserJoinRegex=^\[[^\]]+\] \[node\] player joined instance=\d+ user=(?<userid>\d+) character=\d+ name='(?<username>.+)'\s*$
+Console.UserLeaveRegex=^\[[^\]]+\] \[node\] player left instance=\d+ user=(?<userid>\d+) character=\d+ name='(?<username>.+)' reason=\w+\s*$
 Console.UserChatRegex=^$
 Console.UpdateAvailableRegex=^$
 Console.SuppressLogAtStart=False

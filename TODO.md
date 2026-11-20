@@ -45,8 +45,9 @@ This is what's left to make it fully self-service.
 
 ## Upstream (commonwealthga/commonwealth-ga-server)
 
-- [ ] **Node player logs:** log join/leave with names on nodes so panels can list players
-  ([#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93), opened).
+- [x] **Node player logs.** Done: [#94](https://github.com/commonwealthga/commonwealth-ga-server/pull/94)
+  (fixing [#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93)) shipped in
+  0.1.61. Nodes log `player joined/left … name='…'`, and both apps' AMP user-list patterns match it.
 - [ ] **Make `dll_overrides` configurable again.** The parser line is commented out, so the node
   warns that `version=n,b` doesn't cover `dinput8.dll` on every start, and the template has to set
   the override in the Wine registry instead.
@@ -68,9 +69,11 @@ This is what's left to make it fully self-service.
   ports and goes Ready on the node line. Still to do: a full first update and run with a real
   node key.
 
-- [ ] **Control server self-update on a node.** With `update_mode: apply`, a new `control-server`
-  from the master is swapped in and the agent exits so AMP restarts it. It should work, because
-  AMP restarts apps that exit unexpectedly, but it hasn't happened yet.
+- [x] **Control server self-update on a node.** Seen 2026-11-20 when the master moved to 0.1.61:
+  the node fetched the new `control-server`, waited until no map was running, swapped it in and
+  exited, and AMP restarted it on the new build (start-up steps included) within 3 seconds.
+- [ ] **Players in AMP's user list on a node.** The 0.1.61 lines and the patterns were checked
+  against each other, but no player has joined a node with the new patterns yet.
 - [ ] **Players from outside the LAN on a node.** Tested from inside the node's network (through
   the router's NAT loopback) and with other master players placed on the node, but not
   deliberately from a separate internet connection.
