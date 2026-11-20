@@ -50,7 +50,8 @@ what AMP's Status page shows. Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESH
      installers don't install under Wine; they're tried once and then skipped.
    - adds a Wine DLL override so the game's own `dinput8.dll` loads instead of Wine's built-in one
      (`control-server` only sets `version=n,b` itself).
-5. Writes a starter `control-server.json` **only if none exists**. After that, updates leave it alone.
+5. Writes a starter `control-server.json` **only if none exists**. After that, updates leave it
+   alone; only the start-up steps change it (AMP's ports, and the node settings if you use them).
 
 Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Wine 10 build).
 
@@ -65,9 +66,11 @@ Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Win
 | 9021 | TCP | – | local | AMP's **Master Link** light, open on `127.0.0.1` while the node is connected to its master. Don't forward it. |
 
 These are the defaults. AMP gives an instance other ports when another instance on the machine
-already uses them; the Status page lists the ones an instance really has. The Node app follows
-AMP's ports by itself. For the standalone app, keep `control-server.json` and AMP's port settings
-the same by hand.
+already uses them; the Status page lists the ones an instance really has. Both apps copy AMP's
+ports into `control-server.json` every time the server starts (`tcp_port`, `chat_port` and
+`udp_port_range`; the Node app only the match ports), so AMP's ports always win: changes to those
+keys in the file are overwritten. The internal IPC port isn't one of AMP's ports; see
+[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) if you run two instances on one machine.
 
 ## Setting it up
 
@@ -85,8 +88,11 @@ instead; it's the same first two steps with the Node app.
    - `host`: the public IP or DNS name that internet players reach.
    - `nat_networks` / `nat_ip`: your LAN subnets and the server's LAN IP, so LAN players get the
      LAN address. See `hosting-behind-nat.md` in the server repo.
-5. **Forward the ports** marked *forward* above from your router to the AMP machine, and start the
-   server. AMP shows it **Ready** when the login listener is up.
+
+   Leave the ports alone; they're set from AMP when the server starts.
+5. **Forward the ports** the instance's Status page lists for Login, Chat and Match Ports from your
+   router to the AMP machine, and start the server. AMP shows it **Ready** when the login listener
+   is up.
 
 The standalone app's **Configuration → Global Agenda → Node** page can also turn an existing
 instance into a node (Server role). That works, but its Status page keeps the standalone ports;

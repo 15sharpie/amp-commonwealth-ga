@@ -29,10 +29,13 @@ This is what's left to make it fully self-service.
 - [ ] **Leave the hook DLL alone on nodes during AMP updates.** The "Server Hook DLL Download"
   stage puts the release `dinput8.dll` back on every update, which a node immediately replaces with
   the master's on its next handshake. Harmless, but it could be skipped when role is node.
-- [ ] **Standalone app: follow AMP's ports.** The Node app writes AMP's Match Ports into
-  `control-server.json` on every start; the standalone app's starter config still hard-codes
-  9000/9001/9002-9020, so a second instance on one machine needs a hand edit. Both apps also share
-  the default IPC port 9010.
+- [x] **Standalone app: follow AMP's ports.** Done (2026-11-20): an `Apply Port Settings`
+  start-up step (`amp-port-config.sh`) writes AMP's login, chat and match ports into
+  `control-server.json` on every start. Tested on a throwaway instance that AMP gave
+  9002/9003/9021-9039.
+- [ ] **IPC port for a second instance on one machine.** Both apps default to `ipc_port` 9010,
+  which isn't one of AMP's ports, so AMP can't move it. Today a second instance needs a hand edit;
+  giving it an AMP port would let AMP pick a free one, at the cost of another row on the Status page.
 - [ ] **Daily restart that doesn't kick players.** A scheduled restart lets a standalone server
   pick up a changed public IP and new releases. On a node it should wait until no maps are running;
   AMP's scheduler can't see that, so it needs a small script or an upstream "drain" command.

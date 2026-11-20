@@ -14,5 +14,13 @@
         "UpdateSourceData": "/bin/bash",
         "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-node-config.sh\" \"{{GARole}}\" \"{{GANodeId}}\" \"{{GANodeKey}}\" \"{{GANodeMaster}}\" \"{{GANodeUpdateMode}}\"",
         "SkipOnFailure": true
+    },
+    {
+        "UpdateStageName": "Apply Port Settings",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "\"{{$FullBaseDir}}amp-port-config.sh\" \"{{$ApplicationPort1}}\" \"{{$ApplicationPort2}}\" \"{{$MatchPorts}}\"",
+        "SkipOnFailure": true
     }
 ]
