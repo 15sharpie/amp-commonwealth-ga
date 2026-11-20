@@ -22,7 +22,7 @@ This is what's left to make it self-service.
 - [ ] **Leave the hook DLL alone on nodes during AMP updates.** The "Server Hook DLL Download"
   stage puts the release `dinput8.dll` back on every update, which a node immediately replaces with
   the master's on its next handshake. Harmless, but it could be skipped when role is node.
-- [ ] **Ship or drop the API helpers.** `deploy-to-amp.ps1` needs `amp-query.ps1` and
+- [ ] **Ship or drop the API helpers.** `deploy-to-amp.ps1` and `set-node-ports.ps1` need `amp-query.ps1` and
   `amp-login.ps1`, which aren't in this repo. Either add generic versions or document creating the
   instance from the panel only.
 - [ ] **Daily restart that doesn't kick players.** A scheduled restart lets a standalone server

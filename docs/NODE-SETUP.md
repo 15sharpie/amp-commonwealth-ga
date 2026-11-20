@@ -96,7 +96,30 @@ These two lines are expected and harmless:
 - `dll differs (have …, master offers …) -- fetching`, on every start. The master's DLL replaces
   the release one each time.
 
-## 5. Test with a player
+## 5. Tidy AMP's Status page (optional)
+
+The template lists the Login (TCP 9000) and Chat (TCP 9001) ports for standalone servers. On a
+node they show **Not Listening** in red, because login and chat run on the master. To drop them,
+show Match Ports as a live count, and point the Connection Link at the master's login address:
+
+```powershell
+.\set-node-ports.ps1 -InstanceName <your instance> -MasterLogin <master ip>:9000 -DryRun
+.\set-node-ports.ps1 -InstanceName <your instance> -MasterLogin <master ip>:9000
+```
+
+AMP restarts the instance to apply it, so run it while no match is on the node (the script checks
+and starts the app again afterwards). Afterwards:
+
+- **Match Ports 9002-9020:** green *Listening (n/19, need 1)* while at least one match runs, red
+  *Not Listening (0/19)* when the node is idle. Idle is normal for a node.
+- **Primary Endpoint** shows the node's first match port, and **Connection Link** the master's login.
+
+AMP's panel has no editor for ports, so this goes through the API (`amp-query.ps1`, see
+[Deploying](../README.md#deploying)). Hiding a port (`"Hidden": true`) only hides it from the
+settings page, not from Status. Rebuilding the instance's configuration from the template puts
+the ports back; run the script again after that.
+
+## 6. Test with a player
 
 Log in to the master, pick your node's region, and start a mission. On the node you should see:
 

@@ -80,7 +80,8 @@ address, update mode); a start-up step writes those into `control-server.json`. 
   check the console for running instances before restarting.
 - The master learns the node's public IP from the node's own connection, so no DNS setup is needed.
 - Players still connect straight to the node over UDP 9002-9020, so keep those forwarded. TCP
-  9000/9001 aren't used by a node.
+  9000/9001 aren't used by a node; `set-node-ports.ps1` removes them from AMP's Status page (see
+  [docs/NODE-SETUP.md](docs/NODE-SETUP.md#5-tidy-amps-status-page-optional)).
 - AMP marks a node Ready on its `Node agent '…' up` line. AMP won't list players on a node,
   because the join/leave patterns match chat lines and chat runs on the master.
 - The node logs a warning that `dll_overrides` doesn't cover `dinput8.dll`. That's expected:

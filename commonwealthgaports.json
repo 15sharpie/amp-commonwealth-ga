@@ -17,10 +17,10 @@
         "Protocol": "UDP",
         "Port": 9002,
         "Range": 19,
-        "MinListening": 0,
-        "IsDelayedOpen": true,
+        "MinListening": 1,
+        "IsDelayedOpen": false,
         "Ref": "MatchPorts",
         "Name": "Match Ports",
-        "Description": "UDP ports 9002-9020, one per running game instance (home map and matches). Must match udp_port_range in control-server.json."
+        "Description": "UDP ports 9002-9020, one per running game instance (home map and matches). Shows Listening while at least one runs. Must match udp_port_range in control-server.json."
     }
 ]
