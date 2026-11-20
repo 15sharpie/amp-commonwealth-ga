@@ -54,6 +54,7 @@ Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Win
 | 9001 | TCP | Chat (`chat_port`) |
 | 9002-9020 | UDP | One per running game instance (`udp_port_range`) |
 | 9010 | TCP | Internal IPC between the control server and game processes (`ipc_port`). Don't forward it. |
+| 9021 | TCP | Nodes only: AMP's **Master Link** light, open on `127.0.0.1` while the node is connected to its master. Don't forward it. |
 
 If you change ports in `control-server.json`, change them in AMP's port settings too.
 
@@ -80,7 +81,8 @@ address, update mode); a start-up step writes those into `control-server.json`. 
   check the console for running instances before restarting.
 - The master learns the node's public IP from the node's own connection, so no DNS setup is needed.
 - Players still connect straight to the node over UDP 9002-9020, so keep those forwarded. TCP
-  9000/9001 aren't used by a node; `set-node-ports.ps1` removes them from AMP's Status page (see
+  9000/9001 aren't used by a node; `set-node-ports.ps1` removes them from AMP's Status page and
+  adds a **Master Link** light that's green while the node is connected to its master (see
   [docs/NODE-SETUP.md](docs/NODE-SETUP.md#5-tidy-amps-status-page-optional)).
 - AMP marks a node Ready on its `Node agent '…' up` line. AMP won't list players on a node,
   because the join/leave patterns match chat lines and chat runs on the master.

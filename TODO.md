@@ -56,5 +56,8 @@ This is what's left to make it self-service.
 - [ ] **Players from outside the LAN on a node.** Tested from inside the node's network (through
   the router's NAT loopback) and with other master players placed on the node, but not
   deliberately from a separate internet connection.
+- [ ] **Master Link turning red during a real master outage.** On the live node it showed closed
+  before the first handshake and green right after it, but the master hasn't dropped the link since.
+  The check is the same in both cases (an established TCP connection to `master_addr`).
 - [ ] **Template update applied to an existing instance through AMP's normal flow.** Changes so far
   were pushed to the test instance through the API, because of the repo-name bug above.

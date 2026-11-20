@@ -20,6 +20,7 @@ show up in the instance console, in `amp-wine-setup.log`, or as a map stuck at `
 | An update started through the AMP API reports success but does nothing | The SteamCMD step needs a login, which only the panel can provide. Updates without a Steam step run fine from the API. | Click **Update** in the panel. |
 | Start does nothing on a brand-new instance | The app has never been updated, so there's nothing to start. | Run the first **Update** from the panel. |
 | Node settings from the Configuration page don't show up in `control-server.json` | The start-up step skipped them. | Read `amp-node-config.log`: it says why (missing or malformed setting, `jq` missing, or `control-server.json` isn't plain JSON, for example after `//` comments were pasted in). |
+| Node: **Master Link** on the Status page is red | The node has no open connection to the master (master down, network, or a rejected key), or the indicator isn't running. | Check the console for `[NodeLink]` lines. `amp-master-link.log` records each change with a time, and why the indicator stopped if it did. No log at all: the instance predates the `Start Master Link Indicator` start-up step, or `control-server.json` has no `"role": "node"` / `master_addr`. |
 
 ## Getting more detail
 

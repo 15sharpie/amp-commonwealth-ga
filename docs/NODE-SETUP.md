@@ -100,7 +100,8 @@ These two lines are expected and harmless:
 
 The template lists the Login (TCP 9000) and Chat (TCP 9001) ports for standalone servers. On a
 node they show **Not Listening** in red, because login and chat run on the master. To drop them,
-show Match Ports as a live count, and point the Connection Link at the master's login address:
+show Match Ports as a live count, add a **Master Link** light, and point the Connection Link at the
+master's login address:
 
 ```powershell
 .\set-node-ports.ps1 -InstanceName <your instance> -MasterLogin <master ip>:9000 -DryRun
@@ -112,6 +113,11 @@ and starts the app again afterwards). Afterwards:
 
 - **Match Ports 9002-9020:** green *Listening (n/19, need 1)* while at least one match runs, red
   *Not Listening (0/19)* when the node is idle. Idle is normal for a node.
+- **Master Link 9021:** green while the node is connected to its master, red when it isn't. AMP
+  can only colour ports, so the `Start Master Link Indicator` start-up step (`amp-master-link.sh`)
+  opens a listener on `127.0.0.1:9021` while `control-server` has an open connection to
+  `master_addr`, and closes it when that connection drops. It checks every 5 seconds and logs each
+  change to `amp-master-link.log`. Don't forward 9021; nothing outside the machine uses it.
 - **Primary Endpoint** shows the node's first match port, and **Connection Link** the master's login.
 
 AMP's panel has no editor for ports, so this goes through the API (`amp-query.ps1`, see

@@ -6,6 +6,8 @@
     - removes the Login and Chat ports from its port list,
     - shows Match Ports as a live count: Listening while at least one match runs on the node,
       Not Listening when the node is idle,
+    - adds a Master Link port (TCP 9021, loopback only): green while the node is connected to
+      its master, red when it isn't. The template's amp-master-link.sh start-up step opens it,
     - sets the Connection Link to the master's login address, where players connect.
 
   AMP restarts the instance to apply this, which ends every map the node is hosting. The script
@@ -39,8 +41,20 @@ if (-not $match) { throw "'$InstanceName' has no MatchPorts port. Is it a Global
 $match.IsDelayedOpen = $false   # a delayed-open port always shows "Waiting" while the app runs
 $match.MinListening  = 1
 
+# Not a game port: amp-master-link.sh listens on it only while the node is connected to the master.
+$masterLink = [ordered]@{
+    Protocol = 0; Port = 9021; Offset = 0; Range = 1; MinListening = 0; RangeSeparator = '-'
+    Ref = 'MasterLink'; Name = 'Master Link'; ChildPorts = $null
+    Description = 'Green while this node is connected to its master; red when it is not. A status-only listener on 127.0.0.1, opened by the amp-master-link.sh start-up step. Do not forward it.'
+    IsDelayedOpen = $false; Hidden = $false; Required = $false
+}
+$start = @($live.'GenericModule.App.PreStartStages' | ConvertFrom-Json)
+if (-not ($start | Where-Object UpdateStageName -eq 'Start Master Link Indicator')) {
+    Write-Warning "'$InstanceName' has no 'Start Master Link Indicator' start-up step (made before the template added it), so Master Link will stay red. Recreate the instance from the current template, or add the step."
+}
+
 $settings = @{
-    'GenericModule.App.Ports'                     = ConvertTo-Json -Compress -Depth 6 -InputObject @($match)
+    'GenericModule.App.Ports'                     = ConvertTo-Json -Compress -Depth 6 -InputObject @($match, $masterLink)
     'GenericModule.App.PrimaryApplicationPortRef' = 'MatchPorts'
     'GenericModule.Meta.EndpointURIFormat'        = $MasterLogin
 }
@@ -78,4 +92,4 @@ do {
 } until ($null -ne $state -or (Get-Date) -gt $deadline)
 if ($null -eq $state) { throw "The instance didn't come back within 4 minutes. Check it in the panel." }
 if ($state -ne 20) { $null = & $AmpQuery Core/Start -Instance $InstanceName -Depth 3; "Started the app." }
-"Done: the Status page lists Match Ports and SFTP, and the Connection Link is $MasterLogin."
+"Done: the Status page lists Match Ports, Master Link and SFTP, and the Connection Link is $MasterLogin."
