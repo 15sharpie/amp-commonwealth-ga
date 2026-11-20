@@ -1,8 +1,8 @@
 # What's still needed for anyone to set up a node on their own
 
-Today a node works, but setting one up means hand-editing `control-server.json`, getting a key from
-the master's operator, and knowing several gotchas (see [docs/NODE-SETUP.md](docs/NODE-SETUP.md)).
-This is what's left to make it self-service.
+A node can now be set up from the AMP panel alone with the Node app, but it still means getting a
+key from the master's operator and knowing a few gotchas (see [docs/NODE-SETUP.md](docs/NODE-SETUP.md)).
+This is what's left to make it fully self-service.
 
 ## In this template
 
@@ -12,19 +12,23 @@ This is what's left to make it self-service.
   throwaway instance with each role and with a bad key.
 - [x] **Starter config that knows about nodes.** Covered by the start-up step above: it turns the
   standalone starter config into a node config (and back) based on the settings.
+- [x] **A separate Node app.** Done (2026-11-20): **Global Agenda (Commonwealth Node)**
+  (`commonwealthganode.kvp`) shares the downloads with the standalone app, has only the node
+  settings, refuses to start until they're valid, and shows Match Ports and Master Link on the
+  Status page.
+- [x] **Panel-only setup.** Done (2026-11-20): the repo needs nothing but the AMP panel. The API
+  scripts that used to be here (`deploy-to-amp.ps1`, `set-node-ports.ps1`) needed helpers that
+  were never in the repo, so they were removed.
 - [ ] **CPU check with a clear message.** Have `amp-wine-setup.sh` check `/proc/cpuinfo` for
   `avx2` and log "this CPU can't run the control server (needs x86-64-v3)". The only error today is
   `CPU ISA level is lower than required`, after AMP has already failed twice.
 - [ ] **Rename the repo without hyphens** (for example `15sharpie/AMPCommonwealthGA`). AMP's
   "refresh instance configuration" reads `15sharpie-amp-commonwealth-ga-main` as `--main` and
-  fails, so existing instances don't pick up template fixes without manual work. After a rename,
-  update the Configuration Repositories entry and `deploy-to-amp.ps1`'s `TemplateStore`.
+  fails, so existing instances don't pick up template fixes (new start-up steps, ports) without
+  manual work. After a rename, update the Configuration Repositories entry in the docs.
 - [ ] **Leave the hook DLL alone on nodes during AMP updates.** The "Server Hook DLL Download"
   stage puts the release `dinput8.dll` back on every update, which a node immediately replaces with
   the master's on its next handshake. Harmless, but it could be skipped when role is node.
-- [ ] **Ship or drop the API helpers.** `deploy-to-amp.ps1` and `set-node-ports.ps1` need `amp-query.ps1` and
-  `amp-login.ps1`, which aren't in this repo. Either add generic versions or document creating the
-  instance from the panel only.
 - [ ] **Daily restart that doesn't kick players.** A scheduled restart lets a standalone server
   pick up a changed public IP and new releases. On a node it should wait until no maps are running;
   AMP's scheduler can't see that, so it needs a small script or an upstream "drain" command.
@@ -49,6 +53,11 @@ This is what's left to make it self-service.
   without AVX2 isn't a dead end.
 
 ## Not verified yet
+
+- [ ] **The Node app from scratch.** Create, update and start an instance of **Global Agenda
+  (Commonwealth Node)** in the panel, including what AMP shows when the node settings are missing.
+  Its downloads and start-up steps are the standalone app's, which were tested, but the app as a
+  whole hasn't been run.
 
 - [ ] **Control server self-update on a node.** With `update_mode: apply`, a new `control-server`
   from the master is swapped in and the agent exits so AMP restarts it. It should work, because

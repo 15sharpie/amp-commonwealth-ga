@@ -1,0 +1,64 @@
+[
+    {
+        "DisplayName": "Node ID",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "Your node's name, given to you by the master's operator (for example na-west-yourname). The server won't start until the node ID, key and master address are set.",
+        "Keywords": "node,id,name",
+        "FieldName": "GANodeId",
+        "InputType": "text",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeId",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "Placeholder": "na-west-yourname",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Node key",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "The 64-character hex key the master's operator gave you for this node. Keep it private.",
+        "Keywords": "node,key,secret",
+        "FieldName": "GANodeKey",
+        "InputType": "password",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeKey",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Master address",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "The master's node listener as host:port, from the master's operator.",
+        "Keywords": "node,master,address",
+        "FieldName": "GANodeMaster",
+        "InputType": "text",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeMaster",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "",
+        "Placeholder": "203.0.113.10:9020",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Node update mode",
+        "Category": "Global Agenda:sports_esports",
+        "Subcategory": "Node:hub:1",
+        "Description": "How the node treats builds the master offers. Apply is needed for the master to place players on this node: it swaps in the master's hook DLL live, and for a new control server it swaps it in and exits so AMP restarts it. Stage downloads and verifies offers but never swaps them. Off ignores them.",
+        "Keywords": "node,update",
+        "FieldName": "GANodeUpdateMode",
+        "InputType": "enum",
+        "IsFlagArgument": false,
+        "ParamFieldName": "GANodeUpdateMode",
+        "IncludeInCommandLine": false,
+        "DefaultValue": "apply",
+        "EnumValues": {
+            "apply": "Apply (recommended)",
+            "stage": "Stage only",
+            "off": "Off"
+        }
+    }
+]

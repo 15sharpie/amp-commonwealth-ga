@@ -1,0 +1,20 @@
+[
+    {
+        "Protocol": "UDP",
+        "Port": 9002,
+        "Range": 19,
+        "MinListening": 1,
+        "IsDelayedOpen": false,
+        "Ref": "MatchPorts",
+        "Name": "Match Ports",
+        "Description": "UDP ports 9002-9020, one per match this node is hosting. Listening while at least one runs; Not Listening when the node is idle, which is normal. Forward these to this machine. Must match udp_port_range in control-server.json."
+    },
+    {
+        "Protocol": "TCP",
+        "Port": 9021,
+        "IsDelayedOpen": false,
+        "Ref": "MasterLink",
+        "Name": "Master Link",
+        "Description": "Green while this node is connected to its master, red when it isn't. A status-only listener on 127.0.0.1, opened by the amp-master-link.sh start-up step. Don't forward it."
+    }
+]

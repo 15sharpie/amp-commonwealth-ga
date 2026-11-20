@@ -4,8 +4,10 @@ A **node** hosts game maps for a Commonwealth **master** server. Players log in 
 master; when they start a mission, the master asks a node in their chosen region to run the map,
 and the player's game connects straight to that node over UDP.
 
-This walkthrough takes a fresh AMP install to a working node. It was tested on 2026-11-19 with
-release 0.1.60, AMP 2.8 and the `cubecoders/ampbase:wine-10-stable` image.
+This walkthrough takes a fresh AMP install to a working node. The node setup was tested on
+2026-11-19 with release 0.1.60, AMP 2.8 and the `cubecoders/ampbase:wine-10-stable` image, on an
+instance of the standalone app switched to node. The separate Node app (added 2026-11-20) uses the
+same downloads and start-up steps but hasn't had a full run from scratch yet.
 
 ## Before you start
 
@@ -26,50 +28,54 @@ You need:
   that.
 - **Memory:** about 0.5 GB per running map, plus a little for the agent.
 
-## 1. Add the template to AMP
+Everything below happens in the AMP panel.
+
+## 1. Add the templates to AMP
 
 1. In the AMP controller (ADS): **Configuration → Instance Deployment → Configuration
    Repositories**, add `15sharpie/amp-commonwealth-ga:main`, save, then **Fetch latest**.
-2. **Create Instance** → choose **Global Agenda (Commonwealth)**. Leave *Start on boot* on.
+2. **Create Instance** → choose **Global Agenda (Commonwealth Node)**. Leave *Start on boot* on.
    Don't start the app yet.
 
 ## 2. First update (needs your Steam login)
 
 Open the instance and click **Update**. When AMP asks, type your Steam username, password and
-Steam Guard code. Run the update from the panel: an update started through the AMP API does
-nothing.
+Steam Guard code.
 
 The update downloads the game, the latest release's `control-server` and `dinput8.dll`, and the
 baseline database. It also builds the Wine prefix and installs VC++ 2005 and PhysX, then writes a
 starter `control-server.json`. Check `amp-wine-setup.log` in the file manager: it should end with
 `check: PhysXLoader.dll present`.
 
-## 3. Turn it into a node
+## 3. Fill in the node settings
 
 Open the instance's **Configuration → Global Agenda → Node** settings and set:
 
 | Setting | Value |
 |---|---|
-| Server role | **Node of a Commonwealth master** |
 | Node ID | your node id from the operator |
 | Node key | your 64-hex key (a password field, so it stays hidden) |
 | Master address | `<master ip>:9020` |
 | Node update mode | **Apply (recommended)** |
 
-They're written into `control-server.json` the next time the server starts, by a start-up step
-(`amp-node-config.sh`). It adds `role`, the `node` block, `apply_content`, `db_path` set to
-`node.db`, and `content_dir`, and keeps everything else in the file. It doesn't touch the file if
-a setting is missing or malformed (empty ID, a key that isn't 64 hex characters, an address that
-isn't host:port). It saves the previous file as `control-server.json.bak-amp`. Check
-`amp-node-config.log` (the key is never logged).
+They're written into `control-server.json` every time the server starts, by a start-up step
+(`amp-node-config.sh`). It sets `role` to `node`, the `node` block, `apply_content`, `db_path` to
+`node.db` and `content_dir`, and keeps everything else in the file. It saves the previous file as
+`control-server.json.bak-amp`.
+
+**The server won't start until these are right.** If the ID is empty, the key isn't 64 hex
+characters or the address isn't host:port, the start-up step fails, so AMP never runs the server
+as a standalone one by mistake. `amp-node-config.log` in the File Manager says which setting is
+wrong (the key is never logged).
 
 Keep **Apply**. The master only sends players to nodes whose hook DLL matches its own, and `apply`
 lets the node take the master's DLL. With `stage` or `off`, players get kicked back to the login
 page when they start a mission.
 
-Prefer editing by hand? Leave Server role on **Keep control-server.json as is** and add the
-settings from [`../examples/node-settings.example.jsonc`](../examples/node-settings.example.jsonc)
-yourself.
+The settings page owns the node block. Other parts of `control-server.json` (for example
+`enabled_channels`) can still be edited in the File Manager; see
+[`../examples/node-settings.example.jsonc`](../examples/node-settings.example.jsonc) for what a
+node config looks like.
 
 ## 4. Start it and check the console
 
@@ -96,20 +102,7 @@ These two lines are expected and harmless:
 - `dll differs (have …, master offers …) -- fetching`, on every start. The master's DLL replaces
   the release one each time.
 
-## 5. Tidy AMP's Status page (optional)
-
-The template lists the Login (TCP 9000) and Chat (TCP 9001) ports for standalone servers. On a
-node they show **Not Listening** in red, because login and chat run on the master. To drop them,
-show Match Ports as a live count, add a **Master Link** light, and point the Connection Link at the
-master's login address:
-
-```powershell
-.\set-node-ports.ps1 -InstanceName <your instance> -MasterLogin <master ip>:9000 -DryRun
-.\set-node-ports.ps1 -InstanceName <your instance> -MasterLogin <master ip>:9000
-```
-
-AMP restarts the instance to apply it, so run it while no match is on the node (the script checks
-and starts the app again afterwards). Afterwards:
+## 5. What AMP's Status page shows
 
 - **Match Ports 9002-9020:** green *Listening (n/19, need 1)* while at least one match runs, red
   *Not Listening (0/19)* when the node is idle. Idle is normal for a node.
@@ -118,12 +111,13 @@ and starts the app again afterwards). Afterwards:
   opens a listener on `127.0.0.1:9021` while `control-server` has an open connection to
   `master_addr`, and closes it when that connection drops. It checks every 5 seconds and logs each
   change to `amp-master-link.log`. Don't forward 9021; nothing outside the machine uses it.
-- **Primary Endpoint** shows the node's first match port, and **Connection Link** the master's login.
+- **Primary Endpoint** is the node's first match port. There's no Connection Link: players log in
+  through the master, not the node.
 
-AMP's panel has no editor for ports, so this goes through the API (`amp-query.ps1`, see
-[Deploying](../README.md#deploying)). Hiding a port (`"Hidden": true`) only hides it from the
-settings page, not from Status. Rebuilding the instance's configuration from the template puts
-the ports back; run the script again after that.
+Made a node from the standalone **Global Agenda (Commonwealth)** app instead (its Server role
+setting)? It works, but its Status page keeps the standalone Login and Chat ports (red on a node)
+and has no Master Link light. AMP's panel can't change an instance's ports, so for this Status
+page, create a new instance from the Node app.
 
 ## 6. Test with a player
 
@@ -136,7 +130,7 @@ Log in to the master, pick your node's region, and start a mission. On the node 
 ```
 
 To confirm the player's game reached the map, set `"enabled_channels": ["debug"]` in
-`control-server.json` and restart. Each map then writes `logs/<instance>/debug.txt`, which has a
+`control-server.json` (File Manager) and restart. Each map then writes `logs/<instance>/debug.txt`, which has a
 `notify accepted connection called` line for every client that connects. Turn it off again
 afterwards, because it writes a lot.
 

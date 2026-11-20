@@ -15,19 +15,19 @@ show up in the instance console, in `amp-wine-setup.log`, or as a map stuck at `
 | Node: players get kicked back to the login page when they start a mission | The node's hook DLL doesn't match the master's, so the master won't place players on it. | Set `"update_mode": "apply"` in the `node` block and restart. |
 | Node: the master spawns a map on your node, but the player never arrives and it stops after about 2 minutes with `reason=last player left` | The player's game couldn't reach the node over UDP. | Forward UDP 9002–9020 to the AMP machine on the **same internet connection the node uses to reach the master** (the master advertises the address it sees). With two internet connections, check which one carries outbound traffic. |
 | Players don't appear in AMP's user list | On a master, the join/leave patterns need the chat lines (template v6+). On a node they can't work yet. | Master: update the template. Node: waiting on upstream issue [#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93). |
-| AMP panel: "Unmanaged instances cannot be accessed from within ADS" | The instance was created with `ADSModule/CreateInstance` and inline settings. | Delete it and create it from the panel's wizard, or with `deploy-to-amp.ps1`, which uses `CreateInstanceFromSpec`. |
-| AMP never lists the app after adding the repo | The repo has no `manifest.json`, or it's private. | Keep `manifest.json` at the root (`"repotype": "AppTemplates"`). AMP can only read public repos. |
-| An update started through the AMP API reports success but does nothing | The SteamCMD step needs a login, which only the panel can provide. Updates without a Steam step run fine from the API. | Click **Update** in the panel. |
+| AMP never lists the apps after adding the repo | The repo entry is wrong, or AMP hasn't fetched it. | The entry is `15sharpie/amp-commonwealth-ga:main`. Click **Fetch latest** after saving. |
 | Start does nothing on a brand-new instance | The app has never been updated, so there's nothing to start. | Run the first **Update** from the panel. |
-| Node settings from the Configuration page don't show up in `control-server.json` | The start-up step skipped them. | Read `amp-node-config.log`: it says why (missing or malformed setting, `jq` missing, or `control-server.json` isn't plain JSON, for example after `//` comments were pasted in). |
-| Node: **Master Link** on the Status page is red | The node has no open connection to the master (master down, network, or a rejected key), or the indicator isn't running. | Check the console for `[NodeLink]` lines. `amp-master-link.log` records each change with a time, and why the indicator stopped if it did. No log at all: the instance predates the `Start Master Link Indicator` start-up step, or `control-server.json` has no `"role": "node"` / `master_addr`. |
+| Node app: the server won't start | The node settings are missing or malformed, so the start-up step stops the start on purpose. | Fill in Node ID, Node key (64 hex characters) and Master address (host:port) under **Configuration → Global Agenda → Node**. `amp-node-config.log` says which one is wrong. |
+| Standalone app with Server role "Node": the node settings don't show up in `control-server.json` | The start-up step skipped them. | Read `amp-node-config.log`: it says why (missing or malformed setting, `jq` missing, or `control-server.json` isn't plain JSON, for example after `//` comments were pasted in). |
+| Node: **Master Link** on the Status page is red | The node has no open connection to the master (master down, network, or a rejected key), or the indicator isn't running. | Check the console for `[NodeLink]` lines. `amp-master-link.log` records each change with a time, and why the indicator stopped if it did. No log at all: `control-server.json` has no `"role": "node"` / `master_addr`, or the instance was made before 2026-11-20 and lacks the `Start Master Link Indicator` start-up step (existing instances don't pick up new template steps yet; see [TODO.md](../TODO.md)). |
+| Node made from the standalone app: Login and Chat ports are red, no Master Link | That app's Status page lists the standalone ports. AMP's panel can't change an instance's ports. | Harmless. For the node Status page, create the instance from **Global Agenda (Commonwealth Node)**. |
 
 ## Getting more detail
 
 - **Game process output:** the control server sets `WINEDEBUG=-all` for maps, so Wine errors
-  barely show. To trace a launch, run the same command line the control server uses (it's in the
-  source, `InstanceSpawner.cpp`) with `WINEDEBUG=err+all,+loaddll` from an AMP pre-start step, and
-  time-limit it.
+  barely show. Tracing a launch needs a shell inside the instance's container on the AMP host: run
+  the same command line the control server uses (it's in the source, `InstanceSpawner.cpp`) with
+  `WINEDEBUG=err+all,+loaddll`, and time-limit it.
 - **Per-map logs:** set `"enabled_channels": ["debug"]` in `control-server.json` and restart. Each
   map then writes `logs/<instance>/debug.txt`.
 - **Console history:** AMP's console only keeps the last 40 lines, and `[dbperf]` lines take up

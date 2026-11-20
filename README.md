@@ -1,15 +1,23 @@
-# AMP template: Global Agenda (Commonwealth)
+# AMP templates: Global Agenda (Commonwealth)
 
-An [AMP](https://cubecoders.com/AMP) generic-module template that runs the open-source
+[AMP](https://cubecoders.com/AMP) generic-module templates that run the open-source
 [Commonwealth Global Agenda server](https://github.com/commonwealthga/commonwealth-ga-server).
+Everything is set up from the AMP panel; you don't need anything else on your computer.
 
 The Commonwealth `control-server` (a Linux binary) handles login, chat and matchmaking. It launches
 the real `GlobalAgenda.exe` under Wine + Xvfb with the project's server hook loaded, once
 per running map. So the instance needs the **Global Agenda game files**, downloaded from Steam with
 an account that owns the game (app 17020).
 
-It can run as a standalone server (the default) or as a **node** of a Commonwealth master; see
-[docs/NODE-SETUP.md](docs/NODE-SETUP.md). Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+The repo adds two apps to AMP's list:
+
+| App | Use it to | Guide |
+|---|---|---|
+| **Global Agenda (Commonwealth)** | run your own standalone server: login, chat, matchmaking and maps | [Setting it up](#setting-it-up) |
+| **Global Agenda (Commonwealth Node)** | host maps for a Commonwealth master server as one of its nodes | [docs/NODE-SETUP.md](docs/NODE-SETUP.md) |
+
+Both download and run the same server; they differ in their settings page, start-up checks and
+what AMP's Status page shows. Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Requirements
 
@@ -48,61 +56,62 @@ Runs in the `cubecoders/ampbase:wine-10-stable` container (WineHQ's official Win
 
 ## Ports
 
-| Port | Protocol | Use |
-|---|---|---|
-| 9000 | TCP | Login (`tcp_port`) |
-| 9001 | TCP | Chat (`chat_port`) |
-| 9002-9020 | UDP | One per running game instance (`udp_port_range`) |
-| 9010 | TCP | Internal IPC between the control server and game processes (`ipc_port`). Don't forward it. |
-| 9021 | TCP | Nodes only: AMP's **Master Link** light, open on `127.0.0.1` while the node is connected to its master. Don't forward it. |
+| Port | Protocol | Standalone | Node | Use |
+|---|---|---|---|---|
+| 9000 | TCP | forward | – | Login (`tcp_port`) |
+| 9001 | TCP | forward | – | Chat (`chat_port`) |
+| 9002-9020 | UDP | forward | forward | One per running game instance (`udp_port_range`) |
+| 9010 | TCP | local | local | Internal IPC between the control server and game processes (`ipc_port`). Don't forward it. |
+| 9021 | TCP | – | local | AMP's **Master Link** light, open on `127.0.0.1` while the node is connected to its master. Don't forward it. |
 
 If you change ports in `control-server.json`, change them in AMP's port settings too.
 
-## After the first update, edit `control-server.json`
+## Setting it up
 
-- `host`: the public IP that internet players reach.
-- `nat_networks` / `nat_ip`: your LAN subnets and the server's LAN IP, so LAN players get the LAN
-  address. See `hosting-behind-nat.md` in the server repo.
+All of this happens in the AMP panel. For a node, follow [docs/NODE-SETUP.md](docs/NODE-SETUP.md)
+instead; it's the same first two steps with the Node app.
+
+1. **Add the templates.** In the AMP controller (ADS): **Configuration → Instance Deployment →
+   Configuration Repositories**, add `15sharpie/amp-commonwealth-ga:main`, save, then **Fetch
+   latest**. Both apps then show up under **Create Instance**.
+2. **Create the instance.** **Create Instance** → **Global Agenda (Commonwealth)**. Don't start it
+   yet.
+3. **First update.** Open the instance and click **Update**. AMP asks for your Steam login (an
+   account that owns Global Agenda); type it in yourself. It downloads about 11.5 GB.
+4. **Edit `control-server.json`** in the instance's **File Manager**:
+   - `host`: the public IP or DNS name that internet players reach.
+   - `nat_networks` / `nat_ip`: your LAN subnets and the server's LAN IP, so LAN players get the
+     LAN address. See `hosting-behind-nat.md` in the server repo.
+5. **Forward the ports** marked *forward* above from your router to the AMP machine, and start the
+   server. AMP shows it **Ready** when the login listener is up.
+
+The standalone app's **Configuration → Global Agenda → Node** page can also turn an existing
+instance into a node (Server role). That works, but its Status page keeps the standalone ports;
+for a new node, use the Node app.
 
 ## Running as a node of a Commonwealth master (0.1.60+)
 
 A node doesn't handle logins or chat; the master does. It runs game instances the master asks
-for. Set it up in AMP under **Configuration → Global Agenda → Node** (role, node ID, key, master
-address, update mode); a start-up step writes those into `control-server.json`. Full walkthrough:
-[docs/NODE-SETUP.md](docs/NODE-SETUP.md). To edit by hand instead:
-[examples/node-settings.example.jsonc](examples/node-settings.example.jsonc).
+for, and players' games connect straight to it over UDP. Use the **Global Agenda (Commonwealth
+Node)** app and fill in **Configuration → Global Agenda → Node** (node ID, key, master address,
+update mode). The server won't start until those are set. Full walkthrough:
+[docs/NODE-SETUP.md](docs/NODE-SETUP.md).
 
-- Use `"update_mode": "apply"`. The master places players only on nodes whose hook DLL matches
-  its own. With `stage`, the node kept its own DLL and the master stopped sending it instances
-  (players were kicked back to the login page). `apply` swaps the master's DLL in live, even when
-  it's the `version.dll` build saved under our `dinput8.dll` name; that worked on Wine 10 here.
-  It also self-updates the control server and then exits; AMP restarts it.
+- Keep the update mode on **Apply**. The master places players only on nodes whose hook DLL
+  matches its own. With `stage`, the node kept its own DLL and the master stopped sending it
+  instances (players were kicked back to the login page). `apply` swaps the master's DLL in live,
+  even when it's the `version.dll` build saved under our `dinput8.dll` name; that worked on Wine 10
+  here. It also self-updates the control server and then exits; AMP restarts it.
 - A node restart ends every map it's hosting, including other players' on a shared master, so
   check the console for running instances before restarting.
 - The master learns the node's public IP from the node's own connection, so no DNS setup is needed.
-- Players still connect straight to the node over UDP 9002-9020, so keep those forwarded. TCP
-  9000/9001 aren't used by a node; `set-node-ports.ps1` removes them from AMP's Status page and
-  adds a **Master Link** light that's green while the node is connected to its master (see
-  [docs/NODE-SETUP.md](docs/NODE-SETUP.md#5-tidy-amps-status-page-optional)).
-- AMP marks a node Ready on its `Node agent '…' up` line. AMP won't list players on a node,
-  because the join/leave patterns match chat lines and chat runs on the master.
+- AMP's Status page shows **Match Ports** (green while a match runs) and **Master Link** (green
+  while the node is connected to its master). AMP won't list players on a node yet (upstream
+  [#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93)).
 - The node logs a warning that `dll_overrides` doesn't cover `dinput8.dll`. That's expected:
   `amp-wine-setup.sh` adds the `dinput8` override in the Wine prefix instead.
 
-## Deploying
-
-1. Add `15sharpie/amp-commonwealth-ga:main` to *Configuration Repositories* in the AMP
-   controller's settings and refresh the app list.
-2. Create the instance from AMP's UI like any other app, or through the API:
-
-   ```powershell
-   .\deploy-to-amp.ps1 -DryRun
-   .\deploy-to-amp.ps1
-   ```
-
-   The script needs `..\amp-query.ps1` and a session saved by `..\amp-login.ps1`. It uses the
-   same create call as the panel's wizard, so the app must already be in AMP's app list (step 1).
-   AMP only indexes the repo because of `manifest.json` at its root, so keep that file.
+AMP only indexes this repo because of `manifest.json` at its root, so keep that file.
 
 ## Status
 
