@@ -101,6 +101,9 @@ update mode). The server won't start until those are set. Full walkthrough:
   instances (players were kicked back to the login page). `apply` swaps the master's DLL in live,
   even when it's the `version.dll` build saved under our `dinput8.dll` name; that worked on Wine 10
   here. It also self-updates the control server and then exits; AMP restarts it.
+- If the master goes offline, the node reconnects by itself once it's back: the Master Link
+  start-up script restarts `control-server` when it has stopped retrying and no map is running,
+  so the node rejoins and picks up the master's build.
 - A node restart ends every map it's hosting, including other players' on a shared master, so
   check the console for running instances before restarting.
 - The master learns the node's public IP from the node's own connection, so no DNS setup is needed.

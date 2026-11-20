@@ -33,6 +33,11 @@ This is what's left to make it fully self-service.
   start-up step (`amp-port-config.sh`) writes AMP's login, chat and match ports into
   `control-server.json` on every start. Tested on a throwaway instance that AMP gave
   9002/9003/9021-9039.
+- [x] **Rejoin the master after an outage.** Done (2026-11-20): `amp-master-link.sh` restarts
+  `control-server` when it has stopped trying to reach the master (no attempt for 2 minutes), no map
+  is running and the master answers again, so the node reconnects and takes the master's build. At
+  most once every 10 minutes, and it gives up after 3 restarts that don't connect. Can go once the
+  upstream retry fix below ships.
 - [ ] **IPC port for a second instance on one machine.** Both apps default to `ipc_port` 9010,
   which isn't one of AMP's ports, so AMP can't move it. Today a second instance needs a hand edit;
   giving it an AMP port would let AMP pick a free one, at the cost of another row on the Status page.
@@ -48,6 +53,11 @@ This is what's left to make it fully self-service.
 - [x] **Node player logs.** Done: [#94](https://github.com/commonwealthga/commonwealth-ga-server/pull/94)
   (fixing [#93](https://github.com/commonwealthga/commonwealth-ga-server/issues/93)) shipped in
   0.1.61. Nodes log `player joined/left … name='…'`, and both apps' AMP user-list patterns match it.
+- [ ] **Retry after a timed-out connect to the master.** In `NodeLinkClient.cpp` the connect-timeout
+  handler closes the socket but never schedules a reconnect, so after one
+  `[NodeLink] connect to master timed out` the node never tries again (0.1.61 and 0.1.62). Seen
+  2026-11-20: the master went offline at 15:00 UTC for over half an hour, and the node stayed
+  disconnected after it came back until the node was restarted. One-line fix: call `handle_handshake_failed(...)` from the timeout handler.
 - [ ] **Make `dll_overrides` configurable again.** The parser line is commented out, so the node
   warns that `version=n,b` doesn't cover `dinput8.dll` on every start, and the template has to set
   the override in the Wine registry instead.

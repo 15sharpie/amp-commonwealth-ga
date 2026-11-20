@@ -83,6 +83,15 @@ These two lines are expected and harmless:
   open connection to `master_addr`, and closes it when that connection drops. It checks every 5
   seconds and logs each change to `amp-master-link.log`. Don't forward it; nothing outside the
   machine uses it.
+
+  The same script gets the node back onto the master after an outage. `control-server` (0.1.62
+  and older) stops retrying after a connection attempt times out, which is what happens while
+  the master's machine is offline, so the node would otherwise stay disconnected until someone
+  restarted it. When `control-server` hasn't tried to reach the master for 2 minutes, no map is
+  running and the master answers again, the script stops `control-server`. AMP starts it again a
+  few seconds later, and it reconnects and takes the master's build. It does this at most once
+  every 10 minutes, and stops after 3 restarts that don't get the node connected. Each step is in
+  `amp-master-link.log`.
 - **Primary Endpoint** is the node's first match port. There's no Connection Link: players log in
   through the master, not the node.
 
@@ -117,6 +126,8 @@ afterwards, because it writes a lot.
   `control-server`, the node waits until no map is running, swaps it in and exits, and AMP
   restarts it a few seconds later. You don't need to do anything. AMP's own **Update** also pulls
   the latest GitHub release; the node takes the master's builds again on its next handshake.
+  The node only hears about new builds while it's connected, which is why the Master Link script
+  reconnects it after an outage (see above).
 - **Players show in AMP's user list** while they're in a map on the node (0.1.61+, which logs
   `[node] player joined … name='…'` and `player left …`). Players who are only logged in to the
   master, in no map on this node, don't show: they aren't on this machine.
