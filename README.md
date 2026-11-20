@@ -4,6 +4,9 @@
 [Commonwealth Global Agenda server](https://github.com/commonwealthga/commonwealth-ga-server).
 Everything is set up from the AMP panel; you don't need anything else on your computer.
 
+**New here? Start with [docs/INSTALL.md](docs/INSTALL.md)**: it goes from "AMP is installed" to a
+running server or node.
+
 The Commonwealth `control-server` (a Linux binary) handles login, chat and matchmaking. It launches
 the real `GlobalAgenda.exe` under Wine + Xvfb with the project's server hook loaded, once
 per running map. So the instance needs the **Global Agenda game files**, downloaded from Steam with
@@ -13,18 +16,20 @@ The repo adds two apps to AMP's list:
 
 | App | Use it to | Guide |
 |---|---|---|
-| **Global Agenda (Commonwealth)** | run your own standalone server: login, chat, matchmaking and maps | [Setting it up](#setting-it-up) |
-| **Global Agenda (Commonwealth Node)** | host maps for a Commonwealth master server as one of its nodes | [docs/NODE-SETUP.md](docs/NODE-SETUP.md) |
+| **Global Agenda (Commonwealth)** | run your own standalone server: login, chat, matchmaking and maps | [Install](docs/INSTALL.md#5a-standalone-server) |
+| **Global Agenda (Commonwealth Node)** | host maps for a Commonwealth master server as one of its nodes | [Install](docs/INSTALL.md#5b-node-of-a-master), then [docs/NODE-SETUP.md](docs/NODE-SETUP.md) |
 
 Both download and run the same server; they differ in their settings page, start-up checks and
 what AMP's Status page shows. Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Requirements
 
+In short (details in [docs/INSTALL.md](docs/INSTALL.md#1-check-what-you-need)):
+
 - **CPU with AVX2 (x86-64-v3).** The released `control-server` won't start without it
   (`CPU ISA level is lower than required`). On a VM, use CPU type `x86-64-v3` or `host`.
-- AMP 2.5+ with Docker. The template runs in `cubecoders/ampbase:wine-10-stable`.
-- A Steam account that owns Global Agenda (app 17020); about 12 GB of disk for the game.
+- AMP 2.5+ on Linux, with containers. The template runs in `cubecoders/ampbase:wine-10-stable`.
+- A Steam account that owns Global Agenda (app 17020); about 15 GB of disk.
 - About 0.5 GB of RAM per running map.
 
 ## What an update does
@@ -74,25 +79,10 @@ keys in the file are overwritten. The internal IPC port isn't one of AMP's ports
 
 ## Setting it up
 
-All of this happens in the AMP panel. For a node, follow [docs/NODE-SETUP.md](docs/NODE-SETUP.md)
-instead; it's the same first two steps with the Node app.
-
-1. **Add the templates.** In the AMP controller (ADS): **Configuration → Instance Deployment →
-   Configuration Repositories**, add `15sharpie/amp-commonwealth-ga:main`, save, then **Fetch
-   latest**. Both apps then show up under **Create Instance**.
-2. **Create the instance.** **Create Instance** → **Global Agenda (Commonwealth)**. Don't start it
-   yet.
-3. **First update.** Open the instance and click **Update**. AMP asks for your Steam login (an
-   account that owns Global Agenda); type it in yourself. It downloads about 11.5 GB.
-4. **Edit `control-server.json`** in the instance's **File Manager**:
-   - `host`: the public IP or DNS name that internet players reach.
-   - `nat_networks` / `nat_ip`: your LAN subnets and the server's LAN IP, so LAN players get the
-     LAN address. See `hosting-behind-nat.md` in the server repo.
-
-   Leave the ports alone; they're set from AMP when the server starts.
-5. **Forward the ports** the instance's Status page lists for Login, Chat and Match Ports from your
-   router to the AMP machine, and start the server. AMP shows it **Ready** when the login listener
-   is up.
+Follow [docs/INSTALL.md](docs/INSTALL.md). In short: add `15sharpie/amp-commonwealth-ga:main` to
+AMP's **Configuration Repositories**, create an instance of one of the two apps, run **Update**
+(with your Steam login), then either set `host` in `control-server.json` (standalone) or fill in
+the Node settings (node), forward the ports the Status page lists, and start it.
 
 The standalone app's **Configuration → Global Agenda → Node** page can also turn an existing
 instance into a node (Server role). That works, but its Status page keeps the standalone ports;
@@ -124,8 +114,13 @@ AMP only indexes this repo because of `manifest.json` at its root, so keep that 
 
 ## Status
 
-Working as of 2026-11-19 with release 0.1.60, both standalone (login, character creation, home map,
-travel) and as a node of the public master (placed by the master, clients connect). The server
-project is early and changes daily, and upstream runs it under Proton-GE Wine rather than WineHQ,
-so new releases may need tuning. What's still missing for fully self-service nodes:
-[TODO.md](TODO.md).
+Working as of 2026-11-20 with release 0.1.61:
+
+- **Standalone** (tested 2026-11-19 on 0.1.60): login, character creation, home map, travel.
+- **Node** of the public master: placed by the master, clients connect and play, AMP lists the
+  players and shows Match Ports and Master Link, and the node updates itself when the master moves
+  to a new release. This ran on an instance of the standalone app switched to node. The Node app
+  itself was tested in AMP with a stand-in server, not yet with the real game.
+
+The server project is early and changes daily, and upstream runs it under Proton-GE Wine rather
+than WineHQ, so new releases may need tuning. What's still open: [TODO.md](TODO.md).

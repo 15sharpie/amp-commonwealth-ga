@@ -72,8 +72,12 @@ This is what's left to make it fully self-service.
 - [x] **Control server self-update on a node.** Seen 2026-11-20 when the master moved to 0.1.61:
   the node fetched the new `control-server`, waited until no map was running, swapped it in and
   exited, and AMP restarted it on the new build (start-up steps included) within 3 seconds.
-- [ ] **Players in AMP's user list on a node.** The 0.1.61 lines and the patterns were checked
-  against each other, but no player has joined a node with the new patterns yet.
+- [x] **Players in AMP's user list on a node.** Seen 2026-11-20: a player joining a map on the
+  node showed in AMP's user list by name, and Match Ports went green (1/19) while the map ran.
+  AMP's Analytics recorded the session, anonymously until Store user-specific data was turned on,
+  and with no country (a node never sees player IPs).
+- [ ] **Players in AMP's user list on a standalone server.** The chat patterns (template v6) are
+  in place but haven't been checked with a live login.
 - [ ] **Players from outside the LAN on a node.** Tested from inside the node's network (through
   the router's NAT loopback) and with other master players placed on the node, but not
   deliberately from a separate internet connection.
